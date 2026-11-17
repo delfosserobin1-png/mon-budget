@@ -147,7 +147,6 @@ Choix faits en ton absence, à valider ou à changer :
 | Empreinte digitale | demande un module natif de plus, à tester sur ton téléphone |
 | Plafonds et alertes par enveloppe ou par tag | simple à ajouter une fois l'usage réel observé |
 | Diagramme de flux (Sankey) | peu lisible sur un écran de téléphone ; à rediscuter |
-| Mise en ligne de l'appli (compte GitHub, dépôts) | demande ton accord et ton compte : voir `publication.md` |
 | Relève automatique des commentaires par Claude | à programmer une fois la publication en place |
 | Recevoir un relevé « partagé » depuis une autre appli (menu Partager du téléphone) | possible pour une appli installée ; à faire si l'import par le sélecteur de fichiers te paraît long |
 | Connexion par QR code au lieu de coller le jeton | confort ; à voir après le premier réglage réel |

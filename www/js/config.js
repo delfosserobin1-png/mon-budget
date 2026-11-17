@@ -8,3 +8,10 @@
  * Exemple : export const BUG_REPORT_EMAIL = 'prenom.nom@exemple.fr';
  */
 export const BUG_REPORT_EMAIL = '';
+
+/**
+ * Adresse de la boîte à commentaires (dépôt GitHub privé, voir docs/connexion-claude.md).
+ * Elle pré-remplit l'écran Plus › Connexion à Claude : il ne reste qu'à coller le jeton d'accès.
+ * Ce n'est pas un secret : sans jeton, l'adresse d'un dépôt privé ne donne accès à rien.
+ */
+export const COMMENTS_REPO = 'delfosserobin1-png/mon-budget-commentaires';

@@ -12,12 +12,19 @@ icône, marche sans connexion, se met à jour toute seule, et l'utilisateur peut
 depuis l'appli (« Commentaires pour Claude »). La voie APK (Capacitor) reste possible avec le même
 dossier `www/`, mais n'est plus la voie principale.
 
-**Ce qui reste à faire : la publication** (`docs/publication.md`). Elle demande un compte GitHub et
-l'accord de l'utilisateur ; tant qu'elle n'est pas en place, l'appli ne peut pas être installée sur
-le téléphone et la boîte à commentaires n'existe pas. Ne crée aucun compte ni dépôt sans son accord
-explicite, et ne lui demande jamais de te donner un mot de passe ou un jeton dans la conversation.
+**Publication en place depuis le 17-11-2026** (`docs/publication.md`) :
 
-Ensuite : faire vérifier sur le vrai téléphone la liste de `docs/installer-sur-le-telephone.md`.
+| | |
+| --- | --- |
+| Appli | https://delfosserobin1-png.github.io/mon-budget/ |
+| Code | https://github.com/delfosserobin1-png/mon-budget — public ; chaque envoi sur `main` relance les tests puis publie `www/` (`.github/workflows/publier.yml`) |
+| Commentaires | `delfosserobin1-png/mon-budget-commentaires` — privé ; n° 1 et 2 = essais de connexion faits par Claude (fermés) |
+
+Reste à faire par l'utilisateur : installer l'appli sur son téléphone, régler la connexion à
+Claude dans l'appli (jeton fine-grained limité à la boîte ; l'adresse est déjà remplie via
+`www/js/config.js`), puis vérifier la liste de `docs/installer-sur-le-telephone.md`.
+
+Ne lui demande jamais de te donner un mot de passe ou un jeton dans la conversation.
 
 Ne réécris pas ce qui marche. Pas de framework, pas de dépendance d'exécution, pas de build
 obligatoire : `www/` est servi tel quel.
@@ -39,9 +46,13 @@ obligatoire : `www/` est servi tel quel.
 | `npm run build:fichier-unique` | `dist/mon-budget.html`, l'appli en un seul fichier pour PC |
 | `npm run apk` | fabrique l'APK (voir `docs/guide-apk.md` ; demande JDK 21 et SDK Android) |
 
-Sur l'ordinateur de l'utilisateur (Windows), Node n'est pas installé pour tout le système : une
-version portable est rangée dans le dossier `.outils/` **à côté** du projet. Dans PowerShell, avant
-toute commande `node` / `npm` : `. ..\.outils\env.ps1`.
+Sur l'ordinateur de l'utilisateur (Windows), ni Node, ni git, ni gh ne sont installés pour tout le
+système : des versions portables sont rangées dans le dossier `.outils/` **à côté** du projet. Dans
+PowerShell, avant toute commande `node` / `npm` / `git` / `gh` : `. ..\.outils\env.ps1`. `gh` est
+connecté au compte GitHub de l'utilisateur ; git s'en sert pour s'identifier (réglage local du dépôt).
+
+Avec Windows PowerShell 5.1, une valeur vide (`""`) ou contenant des guillemets est mal transmise
+aux programmes, et `--%` avale le reste de la ligne : passer par `Start-Process -ArgumentList`.
 
 Après toute modification : `npm run pwa`, `npm test`, puis `npm run test:e2e`. Tout doit rester vert.
 
@@ -171,7 +182,8 @@ Quand l'utilisateur dit « traite mes commentaires » (ou équivalent) :
 
 Réglages : `mon-budget.config.json` (`commentaires`, `adresse`) ; modèle dans
 `mon-budget.config.exemple.json`. Le jeton vient de `gh auth token` ou de la variable
-`MON_BUDGET_JETON` ; ne l'écris jamais dans un fichier du projet.
+`MON_BUDGET_JETON` ; ne l'écris jamais dans un fichier du projet. Si l'adresse de la boîte change,
+la changer aussi dans `www/js/config.js` (`COMMENTS_REPO`, qui pré-remplit l'écran de connexion).
 
 Les captures peuvent montrer des montants : ne les copie pas dans le dépôt, ne les cite pas ailleurs.
 
@@ -214,6 +226,9 @@ et grande police). Si un module Capacitor change d'interface, tout est isolé da
 - Pendant `npm test`, l'avertissement « Cannot load "@napi-rs/canvas" » vient de pdf.js lancé hors
   navigateur : il est sans conséquence (la lecture du texte n'utilise pas le dessin).
 - Les parcours e2e chargent `www/` en direct : ne modifie pas `www/` pendant qu'ils tournent.
+- Les serveurs de GitHub sont à l'heure universelle : `tests/e2e/harness.js` règle le processus sur
+  Paris (`process.env.TZ`), et le workflow aussi. Pour reproduire un échec vu chez GitHub :
+  `$env:TZ='UTC'` puis les tests.
 - Dans les tests e2e, le service worker est bloqué par défaut (`openApp({ pwa: true })` l'autorise) ;
   le navigateur de test ne sait pas émuler le mode « plein écran » : voir `tests/e2e/pwa.test.js`.
 - Avec Playwright, une demande interceptée (faux GitHub) aboutit même « hors connexion » : pour

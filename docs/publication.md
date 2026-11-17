@@ -5,10 +5,16 @@ une adresse internet fixe, en https. Elle est conçue pour être hébergée grat
 **GitHub Pages** : c'est aussi GitHub qui sert de boîte à commentaires (voir
 [connexion-claude.md](connexion-claude.md)).
 
-> **État au 17-11-2026 : la publication n'est pas encore en place.** Tout le reste est prêt et
-> testé sur l'ordinateur ; il manque un compte GitHub et l'accord du propriétaire de l'appli pour
-> créer les dépôts. Les étapes de la partie 1 n'ont donc jamais été exécutées « pour de vrai » :
-> la première fois, suivre pas à pas et vérifier chaque résultat.
+> **En place depuis le 17-11-2026.**
+>
+> | | |
+> | --- | --- |
+> | Adresse de l'appli | https://delfosserobin1-png.github.io/mon-budget/ |
+> | Code et publication | https://github.com/delfosserobin1-png/mon-budget (public) |
+> | Boîte à commentaires | `delfosserobin1-png/mon-budget-commentaires` (privé ; les n° 1 et 2 sont des essais de connexion, fermés) |
+>
+> La partie 1 a été faite une fois pour toutes ; elle reste décrite pour mémoire (nouvel
+> ordinateur, nouveau compte). Pour une nouvelle version, aller directement à la partie 2.
 
 ## 1. Mise en place (une seule fois)
 
@@ -30,11 +36,24 @@ dans l'appli ne dépend de GitHub Pages : seules les adresses changent.
 
 Outils nécessaires sur l'ordinateur : `git` et `gh` (GitHub CLI), en plus de Node.
 
+Sur l'ordinateur actuel, les trois sont **portables**, dans le dossier `.outils` à côté du projet
+(rien d'installé dans Windows) : `. ..\.outils\env.ps1` les met à disposition. `gh` est connecté au
+compte ; git s'identifie auprès de GitHub par `gh` (réglage local du dépôt,
+`credential.https://github.com.helper`), et signe ses enregistrements avec l'adresse « noreply » de
+GitHub, pour que l'e-mail du propriétaire ne soit jamais publié.
+
+Sur un autre ordinateur :
+
 ```
 winget install Git.Git
 winget install GitHub.cli
-gh auth login                                   # le propriétaire valide dans son navigateur
+gh auth login --web --scopes workflow           # le propriétaire saisit le code affiché sur github.com/login/device
+gh auth setup-git
 ```
+
+Le droit `workflow` est nécessaire pour envoyer le fichier `.github/workflows/publier.yml`.
+Pour ne pas publier son e-mail : `git config user.email <id>+<compte>@users.noreply.github.com`
+(l'identifiant numérique est donné par `gh api user --jq .id`).
 
 Depuis le dossier du projet (`mon-budget/`) :
 
@@ -42,10 +61,14 @@ Depuis le dossier du projet (`mon-budget/`) :
 git init -b main
 git add -A
 git commit -m "Mon Budget 2.1.0"
-gh repo create mon-budget --public --source . --push
+gh repo create mon-budget --public --source . --remote origin           # sans envoyer tout de suite
+gh api -X POST repos/{owner}/mon-budget/pages -f build_type=workflow   # GitHub Pages publié par le workflow
+git push -u origin main                                                # déclenche la première publication
 gh repo create mon-budget-commentaires --private --add-readme
-gh api -X POST repos/{owner}/mon-budget/pages -f build_type=workflow     # GitHub Pages publié par le workflow
+gh label create mon-budget --repo {owner}/mon-budget-commentaires --force   # et : problème, idée, question
 ```
+
+Activer GitHub Pages **avant** le premier envoi évite une première publication en échec.
 
 Puis :
 
@@ -106,4 +129,6 @@ Ce qui protège d'une mauvaise publication :
 | le téléphone ne voit pas la mise à jour | publication pas terminée, ou échouée | onglet Actions du dépôt ; `node tools/pwa.mjs verifier <adresse>` |
 | Plus › À propos : « Sans connexion : pas encore prêt : … contenu différent » | le site sert un fichier différent de celui annoncé | republier ; vérifier `.gitattributes` ; `node tools/pwa.mjs verifier <adresse>` |
 | le site affiche une erreur 404 | Pages pas activé, ou publié depuis une branche au lieu du workflow | réglages du dépôt › Pages › Source : « GitHub Actions » |
-| `gh` ou `git` introuvable | outils non installés | voir la partie 1 |
+| `gh` ou `git` introuvable | outils non installés, ou `env.ps1` pas lancé | `. ..\.outils\env.ps1` ; sinon voir la partie 1 |
+| un test échoue chez GitHub mais pas sur l'ordinateur | différence d'environnement (Linux, heure universelle) | `gh run view --log-failed` ; reproduire avec `$env:TZ='UTC'` avant `npm run test:e2e` |
+| `gh auth status` : non connecté | jeton retiré sur GitHub, ou autre ordinateur | `gh auth login --web --scopes workflow` (le propriétaire saisit le code) |

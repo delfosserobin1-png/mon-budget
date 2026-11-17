@@ -9,6 +9,7 @@ import { join } from 'node:path';
 import { startAll, stopAll, openApp, addOperation, openTab, answer, noOverlay, settled, readState, chooseFile, download, shot, VERSION } from './harness.js';
 import { decodeText } from '../../www/js/io/zip.js';
 import { parseMarker } from '../../www/js/core/comments.js';
+import { COMMENTS_REPO } from '../../www/js/config.js';
 import { createFakeGithub, FAKE_TOKEN } from '../fake-github.js';
 
 before(startAll);
@@ -79,6 +80,13 @@ test('connexion à Claude : saisie guidée, erreurs expliquées, jeton jamais mo
   const errorOf = (name) => screen.locator(`[data-field="${name}"] .error:not([hidden])`).innerText();
   const submit = () => screen.locator('[data-action="connect"]').click();
 
+  // l'adresse de la boîte réglée dans config.js est déjà remplie : il ne reste qu'à coller le jeton
+  assert.equal(await repo.inputValue(), COMMENTS_REPO);
+  assert.match(await screen.locator('[data-field="repo"]').innerText(), /il ne reste qu’à coller le jeton/);
+  await submit();
+  assert.match(await errorOf('token'), /Colle le jeton/);
+  // adresse effacée : l'appli explique la forme attendue
+  await repo.fill('');
   await submit();
   assert.match(await errorOf('repo'), /ton-nom\/nom-de-la-boite/);
   await repo.fill(REPO);

@@ -43,8 +43,8 @@ et part tout seul au retour de la connexion.
 
 Il faut deux informations, à saisir dans l'appli : **Plus › Connexion à Claude**.
 
-1. **L'adresse de la boîte** : `ton-nom/mon-budget-commentaires` (Claude la crée avec ton accord au
-   moment de publier l'appli, et te la donne).
+1. **L'adresse de la boîte** : `delfosserobin1-png/mon-budget-commentaires`. Elle est **déjà
+   remplie** dans l'appli.
 2. **Un jeton d'accès** : une sorte de clé, limitée à cette seule boîte. Tu le crées toi-même sur
    GitHub, pour que personne d'autre que toi ne l'ait jamais entre les mains :
    - depuis le téléphone, dans l'appli : Plus › Connexion à Claude › **Créer le jeton sur GitHub**

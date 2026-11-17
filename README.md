@@ -5,7 +5,7 @@ rapprochement avec la banque, statistiques. Elle s'installe sur le téléphone c
 normale, marche sans connexion, et tes comptes restent sur le téléphone : ils ne sont jamais envoyés
 sur internet.
 
-Version 2.1.0.
+Version 2.1.0, en ligne : **https://delfosserobin1-png.github.io/mon-budget/**
 
 ## Par où commencer
 

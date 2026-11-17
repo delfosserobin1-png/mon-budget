@@ -9,8 +9,8 @@ tourner en coulisses, mais tu ne vois pas Chrome : ni barre d'adresse, ni onglet
 
 ## Ce qu'il faut
 
-- L'adresse de l'appli (elle ressemble à `https://ton-nom.github.io/mon-budget/`). Elle existe une
-  fois l'appli publiée : voir [publication.md](publication.md).
+- L'adresse de l'appli : **https://delfosserobin1-png.github.io/mon-budget/** (voir
+  [publication.md](publication.md)).
 - Sur Android : Chrome, à jour.
 
 ## Installer

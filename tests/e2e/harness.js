@@ -1,5 +1,11 @@
 // Outils communs aux tests de bout en bout : un vrai navigateur (Chromium) pilote la vraie appli,
 // servie par le petit serveur local. L'horloge est figée pour que les dates soient prévisibles.
+//
+// Les heures des tests (« 2026-11-15T23:58:30 ») sont des heures de Paris, comme dans le navigateur
+// des tests (timezoneId). On règle donc aussi ce processus sur Paris : sans cela, sur un serveur à
+// l'heure universelle (GitHub), 23 h 58 tomberait déjà le lendemain dans l'appli.
+process.env.TZ = 'Europe/Paris';
+
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';

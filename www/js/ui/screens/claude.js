@@ -12,6 +12,7 @@ import { alertDialog, confirmDialog } from '../overlays.js';
 import { textField } from '../fields.js';
 import { formatDate } from '../../core/dates.js';
 import { isToken, parseLinkCode, parseRepo, queuedComments } from '../../core/comments.js';
+import { COMMENTS_REPO } from '../../config.js';
 
 const HOW_TO = [
   "La boîte à commentaires est un dépôt GitHub privé, créé par Claude avec ton accord au moment de publier l'appli. Son adresse ressemble à « ton-nom/mon-budget-commentaires ».",
@@ -36,7 +37,16 @@ export function createClaudeScreen(app) {
   const el = h('section.screen', { dataset: { screen: 'claude' } }, top.el, h('main.scroll', content, h('div.bottom-space')));
 
   let busy = false;
-  const repo = textField({ label: 'Adresse de la boîte à commentaires', name: 'repo', placeholder: 'ton-nom/mon-budget-commentaires', maxLength: 400, autocapitalize: 'none', hint: 'Tu peux aussi coller ici le code de connexion complet.' });
+  const known = parseRepo(COMMENTS_REPO);
+  const repo = textField({
+    label: 'Adresse de la boîte à commentaires',
+    name: 'repo',
+    value: known || '',
+    placeholder: 'ton-nom/mon-budget-commentaires',
+    maxLength: 400,
+    autocapitalize: 'none',
+    hint: known ? 'Déjà remplie : il ne reste qu’à coller le jeton.' : 'Tu peux aussi coller ici le code de connexion complet.',
+  });
   const token = textField({ label: "Jeton d'accès", name: 'token', type: 'password', placeholder: 'github_pat_…', maxLength: 300, autocapitalize: 'none' });
   repo.input.setAttribute('spellcheck', 'false');
   repo.input.setAttribute('autocorrect', 'off');
@@ -92,7 +102,7 @@ export function createClaudeScreen(app) {
         (result.code === 'missing' || result.code === 'issues' ? repo : token).setError(result.error);
         return;
       }
-      repo.value = '';
+      repo.value = known || '';
       token.value = '';
       app.notify('Connecté à Claude');
       const waiting = queuedComments(app.state).length;

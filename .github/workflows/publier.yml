@@ -21,6 +21,8 @@ jobs:
   verifier:
     name: Contrôles avant publication
     runs-on: ubuntu-latest
+    env:
+      TZ: Europe/Paris
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5

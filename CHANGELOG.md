@@ -32,11 +32,16 @@ L'appli s'installe sans APK, se met à jour toute seule, et l'on peut écrire à
   téléphone.
 - Le jeton d'accès à la boîte ne figure dans aucune sauvegarde, aucun diagnostic, aucun écran.
 
-### Reste à faire
+### Mise en ligne
 
-- Mettre l'appli en ligne (compte GitHub, dépôts) : `docs/publication.md`. Tant que ce n'est pas
-  fait, l'installation sur le téléphone et l'envoi des commentaires ne sont pas utilisables.
-- Vérifications sur le vrai téléphone : `docs/installer-sur-le-telephone.md`.
+- Publiée le 17-11-2026 sur https://delfosserobin1-png.github.io/mon-budget/ ; la boîte à
+  commentaires privée a été vérifiée de bout en bout sur le vrai GitHub (envoi avec capture,
+  réponse, discussion, clôture).
+- L'adresse de la boîte est pré-remplie dans l'appli : il ne reste qu'à coller le jeton.
+- Les tests de bout en bout raisonnent à l'heure de Paris quel que soit l'ordinateur (les serveurs
+  de GitHub sont à l'heure universelle ; un test de récurrence à 23 h 58 y échouait).
+- Reste à faire : installer sur le téléphone, régler la connexion dans l'appli, vérifications de
+  `docs/installer-sur-le-telephone.md`.
 
 ## 2.0.0 — novembre 2026
 

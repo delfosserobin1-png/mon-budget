@@ -17,7 +17,7 @@
 
 /* GENERE:DEBUT */
 const VERSION = "2.1.0";
-const BUILD = "258252b52c872c48";
+const BUILD = "2fcaf29bd1819584";
 const FILES = [
   ["css/app.css", "3b9e97430755fc5f68e2e8368edab1dcd45232b60eb8e8233c5049ec72fc549b"],
   ["exemples/releve-exemple.pdf", "5db699a0d7e129d9f6d247333a25785b5992058f6e42658261bff5100c332703"],
@@ -33,7 +33,7 @@ const FILES = [
   ["icons/maskable-512.png", "38913abc3ade22ff831476aca3b9d93d78c524de8e514430398c575397750b2a"],
   ["index.html", "ab4db952f85636bb2a63db1860c1b6cb18c422bbbcab001ec629b65fa62497f4"],
   ["js/changelog.js", "6b26b59dd5a3dc53e8508b4948ea80deb6ff22cd47e115d9d5b6ed2c4646b717"],
-  ["js/config.js", "e8066021b69b1dea48e8c129637423eb1b673bcaa2bd13253b30fee166e1b3d9"],
+  ["js/config.js", "5933275032d4b5aa939981002126caded3e2f094886a72ad3a14bde389fdf41b"],
   ["js/core/balances.js", "fe67a237060af1c95c15649b8437d014b52e3b36c2dae7f830ae4ce65d7dc235"],
   ["js/core/changeset.js", "d97207efbe86e0801c209c2cd1f49718ea78cfd7e0e5b3a3a46644f228136302"],
   ["js/core/comments.js", "7dfd4aa1c9207ae4a8511aefdcb3826ed48e5ff6ec6a17bc60ff663d72116371"],
@@ -86,7 +86,7 @@ const FILES = [
   ["js/ui/photos.js", "7a653630d71ba0cd8b9c37e9c2b0190bc740145c0966438349b9f75dae9e67cb"],
   ["js/ui/pwa-ui.js", "414ff7acf9d76e5217342f29eb09b3cf4323a8d7d1fdb86a5ec357ecad9a6550"],
   ["js/ui/screens/bugs.js", "f4b4e8d6ab6c098a43ffbb0ba739b74b6c74d72c485886d91ae24036289e95a4"],
-  ["js/ui/screens/claude.js", "bce127fa443256fadebca9ff0d9dd0632d7bb7d94433b4b239ec87cc1b0e5eae"],
+  ["js/ui/screens/claude.js", "903afc0fe7d91ee767a1ce6c9f1b9987e7d7df1c4615a0d66059b53a40bd5239"],
   ["js/ui/screens/data-screens.js", "ec90c3cd835671052ce6034fcb5b0c7b3794fcca4e37c9d46cae6f9501a5f6b3"],
   ["js/ui/screens/envelope.js", "2f9fbc51d659a49b76c7dfea0d81b99b4762d1c537d461aad44339055d19b5c2"],
   ["js/ui/screens/envelopes.js", "ea4962e0ab77190d14423c97db7057e73339f4c0ffb0debbdc766500742b4712"],

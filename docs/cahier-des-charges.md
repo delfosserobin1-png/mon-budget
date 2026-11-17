@@ -168,9 +168,9 @@ Code en modules indépendants, logique séparée de l'affichage, voir `architect
 | Stockage en dur sur le téléphone | Fait | base locale, plus copie quotidienne dans un dossier du téléphone |
 | Commenter directement depuis l'appli | Fait | Plus › Commentaires pour Claude ; réponses affichées dans l'appli |
 | Savoir comment connecter | Fait | Plus › Connexion à Claude, expliqué dans `connexion-claude.md` |
-| Que Claude puisse modifier l'appli directement | Prêt | outils et marche à suivre écrits et testés ; attend la publication |
+| Que Claude puisse modifier l'appli directement | Fait | Claude relève la boîte, corrige, teste, publie ; l'appli se met à jour seule |
 | Tout tester | Fait | 180 tests du moteur, 57 parcours ; voir « ce que les tests ne couvrent pas » dans `architecture.md` |
-| Mise en ligne | **À faire avec toi** | compte GitHub et accord nécessaires : `publication.md` |
+| Mise en ligne | Fait | https://delfosserobin1-png.github.io/mon-budget/ (`publication.md`) |
 
 « Fait » veut dire ici : écrit, et vérifié par des tests automatiques sur l'ordinateur. Le
 comportement sur ton téléphone reste à constater (`installer-sur-le-telephone.md`).
