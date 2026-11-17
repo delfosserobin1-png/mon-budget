@@ -1,0 +1,54 @@
+# Publie l'appli (le dossier www/) sur GitHub Pages à chaque envoi sur la branche principale.
+# Rien n'est mis en ligne si la liste des fichiers n'est pas à jour ou si un test échoue.
+name: Publier l'appli
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Une seule publication à la fois ; un envoi plus récent remplace celui qui attend.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  verifier:
+    name: Contrôles avant publication
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Liste des fichiers de l'appli à jour
+        run: node tools/pwa.mjs verifier
+      - name: Tests du moteur
+        run: npm test
+      - name: Navigateur des tests
+        run: npx playwright install --with-deps chromium
+      - name: Parcours dans le navigateur
+        run: npm run test:e2e
+
+  publier:
+    name: Mise en ligne
+    needs: verifier
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploiement.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: www
+      - id: deploiement
+        uses: actions/deploy-pages@v5

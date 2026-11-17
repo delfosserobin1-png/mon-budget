@@ -1,0 +1,11 @@
+{
+  "appId": "fr.monbudget.app",
+  "appName": "Mon Budget",
+  "webDir": "www",
+  "backgroundColor": "#f6f7fb",
+  "android": {
+    "allowMixedContent": false,
+    "backgroundColor": "#f6f7fb",
+    "adjustMarginsForEdgeToEdge": "auto"
+  }
+}

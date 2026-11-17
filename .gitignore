@@ -1,0 +1,9 @@
+node_modules/
+dist/
+tests/e2e/captures/
+# captures d'écran jointes aux commentaires (elles peuvent montrer des montants)
+commentaires/
+# réglages de l'appli Claude propres à cet ordinateur
+.claude/
+*.log
+.DS_Store

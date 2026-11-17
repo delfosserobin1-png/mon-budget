@@ -1,0 +1,4 @@
+# Aucun fichier ne doit être modifié par git (fins de ligne) : l'appli installée vérifie
+# l'empreinte de chaque fichier de www/, et un seul octet de différence entre l'ordinateur et le
+# site publié ferait refuser la mise à jour par les téléphones.
+* -text

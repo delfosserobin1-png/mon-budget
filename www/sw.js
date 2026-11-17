@@ -1,0 +1,198 @@
+// Mon Budget — le « service worker » : le petit programme qui permet à l'appli installée de
+// s'ouvrir sans connexion et de se mettre à jour toute seule.
+//
+// Principe :
+//  - à l'installation, TOUS les fichiers de l'appli (liste ci-dessous) sont téléchargés, vérifiés
+//    un par un (empreinte SHA-256) puis rangés dans une réserve propre à cette version ;
+//  - ensuite l'appli est toujours servie depuis cette réserve : elle démarre sans réseau, et ne
+//    mélange jamais les fichiers de deux versions ;
+//  - quand une nouvelle version est publiée, elle est préparée à côté sans rien interrompre, puis
+//    prend le relais au lancement suivant (ou quand on touche « Mettre à jour » dans l'appli).
+//
+// Ce programme ne touche jamais aux données (opérations, enveloppes…) : elles sont dans la base
+// locale du téléphone, pas dans cette réserve. Les échanges avec d'autres sites (la boîte à
+// commentaires) ne passent pas par lui.
+//
+// La liste ci-dessous est écrite par « npm run pwa » (tools/pwa.mjs) : ne pas la modifier à la main.
+
+/* GENERE:DEBUT */
+const VERSION = "2.1.0";
+const BUILD = "258252b52c872c48";
+const FILES = [
+  ["css/app.css", "3b9e97430755fc5f68e2e8368edab1dcd45232b60eb8e8233c5049ec72fc549b"],
+  ["exemples/releve-exemple.pdf", "5db699a0d7e129d9f6d247333a25785b5992058f6e42658261bff5100c332703"],
+  ["fonts/inter-400.woff", "899122c9fc86169f81f1f58527d477616c5447dc9a32149949ac5bbe4ef5733b"],
+  ["fonts/inter-500.woff", "f3bd59cccdd335310bddfc07e29677d8f11135b1cb4d0545c755e8d283853d09"],
+  ["fonts/inter-600.woff", "a72f34d157db5f2ce1cc0d9df851a7d87a9dd667f46118fed853f752fe829050"],
+  ["fonts/inter-display-600.woff", "bd0e9a6c3206c50082596d35bc8c4af93ffcfb5b2e4b2279fda9be7fe24e9f8f"],
+  ["icons/apple-touch-icon.png", "c6e5f4045d27471638c3c9ecb37030f14d954a3860d130b9537e0c6a64c0595c"],
+  ["icons/icon-192.png", "45adc4fdd71c0be2f72657352264afb3aeb294fcc5eafa529a51e930e208ab4f"],
+  ["icons/icon-512.png", "eaa320449de39d556cc52970115599e9527199e53d6130069477b853dec4efb8"],
+  ["icons/icon.svg", "15f1d6273bdeacbadc55aa611348d9946c6841d0316feabd2d51ee5f381df78e"],
+  ["icons/maskable-192.png", "2459a7c064a8b4e89582cf9d697089310204ce78e06713a775099ec85ee2f3b3"],
+  ["icons/maskable-512.png", "38913abc3ade22ff831476aca3b9d93d78c524de8e514430398c575397750b2a"],
+  ["index.html", "ab4db952f85636bb2a63db1860c1b6cb18c422bbbcab001ec629b65fa62497f4"],
+  ["js/changelog.js", "6b26b59dd5a3dc53e8508b4948ea80deb6ff22cd47e115d9d5b6ed2c4646b717"],
+  ["js/config.js", "e8066021b69b1dea48e8c129637423eb1b673bcaa2bd13253b30fee166e1b3d9"],
+  ["js/core/balances.js", "fe67a237060af1c95c15649b8437d014b52e3b36c2dae7f830ae4ce65d7dc235"],
+  ["js/core/changeset.js", "d97207efbe86e0801c209c2cd1f49718ea78cfd7e0e5b3a3a46644f228136302"],
+  ["js/core/comments.js", "7dfd4aa1c9207ae4a8511aefdcb3826ed48e5ff6ec6a17bc60ff663d72116371"],
+  ["js/core/dates.js", "6e0e72c5b7a5d117e7b3e2f95c54cbd1b609e76116a3e51c08f90110b2c108ce"],
+  ["js/core/demo.js", "acfdc72d00cd2b1635e63fb872cd427edde70a20055b8737de0071e9aa39a68c"],
+  ["js/core/envelopes.js", "b8d3285003abe4915e60f8b532375d6524df6a36d32cc9ccde80bb9503304b94"],
+  ["js/core/filters.js", "1efc08031a7249ffec4fed57e9d3d1a9c747e0ae9a112b30c9f05607326a6a7f"],
+  ["js/core/ids.js", "8a0a558dbe089df95bb2a22d326cbc2310c88410338e8ad1f8aba198477af4c6"],
+  ["js/core/matching.js", "db5b79a44db11cb06e660227676b10b7d81bcd3ac9116ffb0334f0048d7ec401"],
+  ["js/core/money.js", "a2c058972e71c1f78116ac50d357f674786062761f3f8af3dd9d674a1aca7bd3"],
+  ["js/core/operations.js", "c4367417e0eab3b18ebc030a831d964b12ed0db88a4a6f29986f92d17d55285e"],
+  ["js/core/portable.js", "397864c982017f39b1d5fadbb98587ae66a01e32bf9af6713d5da2f3d490bb60"],
+  ["js/core/reconciliation.js", "79ed96ed363f71a83b3ce57c022cbb455c9c8020a4a62f9d267772a9e3a473ef"],
+  ["js/core/recurring.js", "ce5735d76a22b70c40d812e59e88e85b1fe268b0174df4d845a1d59d4aedce36"],
+  ["js/core/rules.js", "d1d3f2a2737cafe2755823deda56c8cafdfd3bbcfe2be027f7a643af44e3f2d7"],
+  ["js/core/schema.js", "ba5e92b3b3aae3de0d66dc1bced4feadc7364118951a0acd22f3c7e33f12788a"],
+  ["js/core/sha256.js", "efbe06354307c044816f76e9835d9eaf002d02ca1ee3fe54a3cb6896b863f21f"],
+  ["js/core/stats.js", "139022ce3cbbbb6e2f44ab94cf3870613d38ecee0d3c45c78cb06bda7b41164c"],
+  ["js/core/tags.js", "d1b717436f1d40b8f7ab7a27cd18d190aaeb0fa128fa148343bb6f4211bfd97b"],
+  ["js/core/text.js", "3d15eb05c10ba12106e461afb4d31c8a40e40712eb356cbc6c594bd32121c48b"],
+  ["js/data/backup.js", "0e1fb1d8e7dd18601587656a3e99b930344182232966480c5241afd63f4fdb49"],
+  ["js/data/claude-link.js", "6624d1487b503cc64845e9af5e894dbf323f3ac9e7f22683c10e98b3b8503465"],
+  ["js/data/db.js", "1ebfee1674a5a40b7c2c2840c01f2969d7ec51524d6782d52c0015a4bf5c5e99"],
+  ["js/data/store.js", "dbcf0afdd91aa11c91d433f01849a37aa9d3428103138dffa17e55b468451915"],
+  ["js/io/exports.js", "cfaff9cd6653421d24ca6361c866a1341e95b31e86143eb2efe67d2c2767e011"],
+  ["js/io/github.js", "91311194eb8cf709cedd70e297a513b861b357311249b95d75075eeae8378e95"],
+  ["js/io/statement/index.js", "01b611909f11153a3ccd6aa6ce58e1c18f5ade0b68b542bad503cdb194dcbac9"],
+  ["js/io/statement/labels.js", "8c96240b9754cbae99da8c939e37b5dab913d1698b3a581d9c1fb7870bceb917"],
+  ["js/io/statement/pdf-table.js", "b1f41c7b182ef1c1961451e006a74815abdb4f67883c44d4b1d1e5aa58200cce"],
+  ["js/io/statement/pdf.js", "3f438912a9454e6851ec62bb8f502b68c16a14b11e68df065d6fc44478826f4a"],
+  ["js/io/statement/text-formats.js", "04e884d46efceae203a7da62b1ebcb0bef20d2f17858160aea3e6763e4598bbf"],
+  ["js/io/xlsx.js", "a1575c532b82a0b3caf69ada40385325cab78ff5649241476b57d42935afc0a1"],
+  ["js/io/zip.js", "8bb77ee6865c4e27a5405401e1fdc8fb722c444193800016e404c1da00048368"],
+  ["js/main.js", "19d99c04d55deac52eff583dc448ca4d660def981a8f05e7ac1e9d31535b0ee6"],
+  ["js/platform/folder.js", "da4f616d959f536790d0b05848662eb784ab075ea00678695a1887d7f9d09aee"],
+  ["js/platform/platform.js", "18713bd504b74603df98f17519e92a7bb16e9336084ecf10e3832ca76e298ac1"],
+  ["js/platform/pwa.js", "3e55cb5a34bcdeaeee01f3540471779d7333ae5004ea18b6e5accdbdee77df88"],
+  ["js/ui/app.js", "df11a59be4f24e5dc3e7b6e2cc6c4a2f6351ea8c0d5201bb28486555c988b79f"],
+  ["js/ui/charts/charts.js", "d610421957287bcff815f70f5337499fa8accac1dc26b664d52315d5a6dccbd4"],
+  ["js/ui/dom.js", "f27417aff03033c21eb4471d5e7acb2c9b60f1ab273302f8b2a9013faa237cb1"],
+  ["js/ui/fields.js", "640ac43c7e667e01a5b7c7a4c350ce80f2b044c33e603b01a0b3ea85752243c3"],
+  ["js/ui/forms/envelope.js", "57a471f2e2bcbf59da8f8b616fc5ed557492bdf4eb16f5e7702a55377c1617b5"],
+  ["js/ui/forms/filters.js", "bd286aa2c5a537e09c1a1a49abe45c137694471b4a090f15f1d71c952ac2f8a0"],
+  ["js/ui/forms/operation.js", "96f641cb9adf24c6d5037ae30844ee08c3f002baf51bdeaf8160ea706459f28c"],
+  ["js/ui/forms/recurring.js", "046945ee1130f538373c87b9a682ad17d8ee9876a84ab307f785d88a0f18c914"],
+  ["js/ui/forms/tag.js", "a9906a528b765a40561800d423353cb45eadfe21661f36c34ed0f2cc4924ed69"],
+  ["js/ui/icons.js", "3997a15371d4f913133d5860f59c8c89e89645798a75b6102d6ff947d7aba7c5"],
+  ["js/ui/oprow.js", "2982e941593cf9d7e10de800f53fbd3a82f016b401503fe3f769cb06b772c890"],
+  ["js/ui/overlays.js", "e194b76fc6cac71357f5eb1e40eb1ade0627051309293399b28015029e80995f"],
+  ["js/ui/photos.js", "7a653630d71ba0cd8b9c37e9c2b0190bc740145c0966438349b9f75dae9e67cb"],
+  ["js/ui/pwa-ui.js", "414ff7acf9d76e5217342f29eb09b3cf4323a8d7d1fdb86a5ec357ecad9a6550"],
+  ["js/ui/screens/bugs.js", "f4b4e8d6ab6c098a43ffbb0ba739b74b6c74d72c485886d91ae24036289e95a4"],
+  ["js/ui/screens/claude.js", "bce127fa443256fadebca9ff0d9dd0632d7bb7d94433b4b239ec87cc1b0e5eae"],
+  ["js/ui/screens/data-screens.js", "ec90c3cd835671052ce6034fcb5b0c7b3794fcca4e37c9d46cae6f9501a5f6b3"],
+  ["js/ui/screens/envelope.js", "2f9fbc51d659a49b76c7dfea0d81b99b4762d1c537d461aad44339055d19b5c2"],
+  ["js/ui/screens/envelopes.js", "ea4962e0ab77190d14423c97db7057e73339f4c0ffb0debbdc766500742b4712"],
+  ["js/ui/screens/forecast.js", "316b17d67ef6161d03c954ef56dc7e57a8e491d08e65e9a9c10b6c7ff444fc77"],
+  ["js/ui/screens/guide.js", "314dd330add984b2245cde96a746ace9e40fdd67cdf67b01154438c92233cdf3"],
+  ["js/ui/screens/lock.js", "a6ba1e9ad84754f4912fc0e84c2f9413be8aef9ae55900bcabb7e7d8a8dd01ed"],
+  ["js/ui/screens/more.js", "e5bba7982c2d1ff0b8bb2ab0248efd0da6728e468425c5c40fed9062334b7cfb"],
+  ["js/ui/screens/onboarding.js", "01f476db70dcc9b84bf7ba96f87cc8042d2df3e9bd5ba0dc899bd59bf8389470"],
+  ["js/ui/screens/operations.js", "f0fc225c67ef731ec0ef8c4f1351810d8b177a3d7a5f79381e88aceadfa2e320"],
+  ["js/ui/screens/settings-screens.js", "2387e9ce5a1d9710cfc01d4b980b5488eb8e085a42c8ace1c70cfff4caa6bfd3"],
+  ["js/ui/screens/statement.js", "2db67fbccf55c4920e87a7871a9909e8b9eeda2c01463631657d57e3499be262"],
+  ["js/ui/screens/stats.js", "9ec6d598616a13068e01aa9683b790d314145f268c92b7dfb5c0a05c27b64581"],
+  ["js/ui/screens/sub-screens.js", "bf4d9d2b7f7f33b2165bdbb6b412059f1ea859e1d8b72451a2a90a0c6fb2ef3e"],
+  ["js/ui/shell.js", "2ce64b58ba059395f42020be007f5dc50c2700744c86b78e55be98ca6f520f51"],
+  ["manifest.webmanifest", "7d5126bee0c4cf0dd1ad11a02a53f9fe97a0cd600938d4aaf13b44106daae8b3"],
+  ["vendor/pdfjs/pdf.min.js", "9fab0c910bf1484835c5c2aeb68f7eb3dfce7f9eb435a004526c5af86d70890c"],
+  ["vendor/pdfjs/pdf.worker.min.js", "bc0d1b88ea0b66196b1d36a58ac243c6d92adfe725624e2a9fdd381bdf8ef434"],
+];
+/* GENERE:FIN */
+
+const CACHE_PREFIX = 'mon-budget-';
+const CACHE = `${CACHE_PREFIX}${BUILD}`;
+const BASE = new URL('./', self.location).href; // le dossier de l'appli (se termine par « / »)
+const INDEX = new URL('index.html', BASE).href;
+const PARALLEL = 6;
+
+const hex = (buffer) => Array.from(new Uint8Array(buffer), (byte) => byte.toString(16).padStart(2, '0')).join('');
+
+/** Télécharge un fichier sans passer par le cache du navigateur et vérifie son empreinte. */
+async function fetchVerified(path, expected) {
+  const url = new URL(path, BASE).href;
+  const response = await fetch(url, { cache: 'reload', credentials: 'same-origin' });
+  if (!response.ok) throw new Error(`${path} : réponse ${response.status}`);
+  const body = await response.arrayBuffer();
+  const digest = hex(await crypto.subtle.digest('SHA-256', body));
+  if (digest !== expected) throw new Error(`${path} : contenu différent de la version publiée`);
+  const headers = new Headers();
+  const type = response.headers.get('Content-Type');
+  if (type) headers.set('Content-Type', type);
+  return { url, response: new Response(body, { status: 200, headers }) };
+}
+
+async function install() {
+  const cache = await caches.open(CACHE);
+  let next = 0;
+  const worker = async () => {
+    while (next < FILES.length) {
+      const [path, hash] = FILES[next++];
+      const { url, response } = await fetchVerified(path, hash);
+      await cache.put(url, response);
+    }
+  };
+  await Promise.all(Array.from({ length: Math.min(PARALLEL, FILES.length) }, worker));
+}
+
+async function tellClients(message) {
+  const clients = await self.clients.matchAll({ includeUncontrolled: true, type: 'window' });
+  for (const client of clients) client.postMessage(message);
+}
+
+self.addEventListener('install', (event) => {
+  event.waitUntil(
+    install().catch(async (error) => {
+      // Une réserve incomplète ne doit jamais servir : on l'efface, la version en place continue.
+      await caches.delete(CACHE);
+      await tellClients({ type: 'INSTALL_ERROR', build: BUILD, message: String((error && error.message) || error) });
+      throw error;
+    }),
+  );
+});
+
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    (async () => {
+      const keys = await caches.keys();
+      await Promise.all(keys.filter((key) => key.startsWith(CACHE_PREFIX) && key !== CACHE).map((key) => caches.delete(key)));
+      await self.clients.claim();
+    })(),
+  );
+});
+
+async function serve(request) {
+  const url = new URL(request.url);
+  url.search = '';
+  url.hash = '';
+  const key = url.href === BASE ? INDEX : url.href;
+  const cache = await caches.open(CACHE);
+  const hit = await cache.match(key);
+  if (hit) return hit;
+  // Une adresse inconnue ouverte comme une page (ancien raccourci, lien tronqué) : on sert l'appli.
+  if (request.mode === 'navigate') {
+    const shell = await cache.match(INDEX);
+    if (shell) return shell;
+  }
+  return fetch(request);
+}
+
+self.addEventListener('fetch', (event) => {
+  const request = event.request;
+  if (request.method !== 'GET') return;
+  if (!request.url.startsWith(BASE)) return; // autre site, ou autre dossier du même site : on ne s'en mêle pas
+  event.respondWith(serve(request));
+});
+
+self.addEventListener('message', (event) => {
+  const type = event.data && event.data.type;
+  if (type === 'SKIP_WAITING') self.skipWaiting();
+  else if (type === 'GET_VERSION' && event.ports && event.ports[0]) event.ports[0].postMessage({ version: VERSION, build: BUILD, files: FILES.length });
+});

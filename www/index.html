@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f6f7fb">
+  <meta name="color-scheme" content="light dark">
+  <meta name="format-detection" content="telephone=no">
+  <meta name="application-name" content="Mon Budget">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Mon Budget">
+  <title>Mon Budget</title>
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="stylesheet" href="css/app.css">
+  <script>
+    // Thème choisi dans l'appli, appliqué avant le premier affichage (évite un éclair blanc en mode sombre).
+    try {
+      var t = localStorage.getItem('mon-budget-theme');
+      if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
+    } catch (e) {}
+  </script>
+</head>
+<body>
+  <div id="app">
+    <div class="empty" style="padding-top: 30vh">
+      <h2>Mon Budget</h2>
+      <p id="boot-status">Ouverture…</p>
+    </div>
+  </div>
+  <noscript>Cette appli a besoin de JavaScript pour fonctionner.</noscript>
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
