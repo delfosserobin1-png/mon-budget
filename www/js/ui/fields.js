@@ -33,6 +33,26 @@ function wrapField({ label, optional = false, control, input = null, hint = null
   };
 }
 
+/**
+ * Prévient onInput à chaque frappe (« input »). Filet de sécurité : une suggestion (liste du champ,
+ * clavier du téléphone) peut changer la valeur sans « input » ; « change », qui arrive au plus tard
+ * quand on quitte le champ, la rattrape — mais seulement si elle a vraiment changé, pour ne rien
+ * redessiner au moment précis où l'on touche un autre bouton.
+ */
+function watchValue(input, onInput, onTyping) {
+  let last = input.value;
+  input.addEventListener('input', () => {
+    last = input.value;
+    onTyping();
+    if (onInput) onInput(input.value);
+  });
+  input.addEventListener('change', () => {
+    if (input.value === last) return;
+    last = input.value;
+    if (onInput) onInput(input.value);
+  });
+}
+
 export function textField({ label, value = '', placeholder = '', optional = false, name = '', maxLength = 120, suggestions = null, onInput = null, hint = null, type = 'text', inputMode = null, autocapitalize = 'sentences' }) {
   const input = h('input', { type, placeholder, maxlength: maxLength, autocomplete: 'off', autocapitalize, inputmode: inputMode, name: name || null });
   input.value = value;
@@ -43,10 +63,7 @@ export function textField({ label, value = '', placeholder = '', optional = fals
   }
   const field = wrapField({ label, optional, control: input, hint, name });
   if (list) field.el.appendChild(list);
-  input.addEventListener('input', () => {
-    field.setError('');
-    if (onInput) onInput(input.value);
-  });
+  watchValue(input, onInput, () => field.setError(''));
   return {
     ...field,
     input,
@@ -64,10 +81,7 @@ export function textArea({ label, value = '', placeholder = '', optional = false
   const input = h('textarea', { placeholder, maxlength: maxLength, rows, name: name || null });
   input.value = value;
   const field = wrapField({ label, optional, control: input, name });
-  input.addEventListener('input', () => {
-    field.setError('');
-    if (onInput) onInput(input.value);
-  });
+  watchValue(input, onInput, () => field.setError(''));
   return {
     ...field,
     input,

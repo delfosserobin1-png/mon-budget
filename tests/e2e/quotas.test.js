@@ -57,7 +57,9 @@ test('quota : réglé dans un tag, refusé s’il est incohérent, visible dans 
   // une dépense de 45 € : prévenu à 90 % ; 60 € : dépassement annoncé ; on enregistre quand même
   await page.evaluate(() => window.monBudget.go('operations'));
   await page.locator('[data-screen="operations"] [data-action="add"]').click();
-  await fillOperation(page, { amount: '45', label: 'Anniversaire', tags: ['Cadeaux'], save: false });
+  // un libellé qu'aucune suggestion ne complète (« Anniversaire » ouvrait la liste « Cadeau
+  // d'anniversaire » chez GitHub : ce cas-là est vérifié par tests/e2e/saisie.test.js)
+  await fillOperation(page, { amount: '45', label: 'Livre pour Léa', tags: ['Cadeaux'], save: false });
   const notice = sheet(page).locator('[data-notice="quota"]');
   await notice.waitFor();
   assert.equal(await notice.getAttribute('data-level'), 'warn');
@@ -87,7 +89,7 @@ test('quota : réglé dans un tag, refusé s’il est incohérent, visible dans 
   await settled(page);
   const rows = page.locator('[data-screen="operations"] .op-row');
   assert.equal(await rows.count(), 1);
-  assert.match(await rows.first().innerText(), /Anniversaire/);
+  assert.match(await rows.first().innerText(), /Livre pour Léa/);
   await done(ctx);
 });
 

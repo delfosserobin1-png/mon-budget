@@ -17,7 +17,7 @@
 
 /* GENERE:DEBUT */
 const VERSION = "2.2.0";
-const BUILD = "2814fc2ae307d1a3";
+const BUILD = "15fd4d93b68cbad4";
 const FILES = [
   ["css/app.css", "185364ad45ccda488ff218788c7685aeeb4e2cc57f5999974e5b3d8eb4fa3758"],
   ["exemples/releve-exemple.pdf", "5db699a0d7e129d9f6d247333a25785b5992058f6e42658261bff5100c332703"],
@@ -77,10 +77,10 @@ const FILES = [
   ["js/ui/capture.js", "b421735b13df7ac4b38eb18b83be622c197ffa0a60201435ee0db9fb576b18b2"],
   ["js/ui/charts/charts.js", "d610421957287bcff815f70f5337499fa8accac1dc26b664d52315d5a6dccbd4"],
   ["js/ui/dom.js", "3bbefba4b0195d10d7c3227fd0c5f45370cb4a41a577bf32bffb9404e3b8f4ef"],
-  ["js/ui/fields.js", "640ac43c7e667e01a5b7c7a4c350ce80f2b044c33e603b01a0b3ea85752243c3"],
+  ["js/ui/fields.js", "0274cf36dc99d2664ec37401e9ce339ce0fe84c4b6bddaf1fca6e373279210b3"],
   ["js/ui/forms/envelope.js", "57a471f2e2bcbf59da8f8b616fc5ed557492bdf4eb16f5e7702a55377c1617b5"],
   ["js/ui/forms/filters.js", "bd286aa2c5a537e09c1a1a49abe45c137694471b4a090f15f1d71c952ac2f8a0"],
-  ["js/ui/forms/operation.js", "d06c85e82e768f218cba54627a8ea622ec25fc619dbda16b7727d0c298190499"],
+  ["js/ui/forms/operation.js", "e699090d6d27525d2eda57e526af574e727b5f2e69f760ed596f041c97ec43c7"],
   ["js/ui/forms/recurring.js", "4b6cb334261ebfd3333bbe39518caa941570f260f828f686d631bd687814d720"],
   ["js/ui/forms/tag.js", "bd204c29fdf305e0f0f347f467effe912a499fec7fd7a77d18993ee21d8eb52e"],
   ["js/ui/icons.js", "3997a15371d4f913133d5860f59c8c89e89645798a75b6102d6ff947d7aba7c5"],

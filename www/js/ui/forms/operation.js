@@ -164,7 +164,18 @@ export function openOperationForm(app, { id = null, preset = null } = {}) {
       .map((e) => ({ value: e.id, label: withBalance ? `${e.name} (${formatAmount(balances.get(e.id) || 0)})` : e.name }));
   }
 
-  function render() {
+  // Ce qui est écrit dans les champs fait foi : on le relit avant de redessiner le formulaire et
+  // avant d'enregistrer (une suggestion du champ ou du clavier ne prévient pas toujours).
+  function syncTyped() {
+    for (const key of ['label', 'counterparty', 'comment']) {
+      const input = fields[key]?.input;
+      if (input && input.isConnected) f[key] = input.value;
+    }
+  }
+
+  // sync: false quand l'appelant vient lui-même de changer libellé, tiers ou commentaire
+  function render({ sync = true } = {}) {
+    if (sync) syncTyped();
     // on reconstruit le formulaire sans faire sauter la position de lecture
     const scroller = sheet.body;
     const top = scroller.scrollTop;
@@ -196,7 +207,7 @@ export function openOperationForm(app, { id = null, preset = null } = {}) {
                 f = { ...blank(today), mode: keepMode, time: nowTime() };
                 restored = false;
                 app.setSetting(DRAFT_KEY, undefined, { silent: true }).catch(() => {});
-                render();
+                render({ sync: false });
               },
             },
             'Effacer',
@@ -430,6 +441,7 @@ export function openOperationForm(app, { id = null, preset = null } = {}) {
               type: 'button',
               dataset: { action: 'apply-habit' },
               onclick: () => {
+                syncTyped();
                 if (hint.label && !f.label.trim()) f.label = hint.label;
                 f.tags = [...hint.tags];
                 if (isExpense) {
@@ -437,7 +449,7 @@ export function openOperationForm(app, { id = null, preset = null } = {}) {
                   if (hint.envelopeId && !f.envelopeId) f.envelopeId = hint.envelopeId;
                 }
                 touch();
-                render();
+                render({ sync: false });
               },
             },
             'Reprendre',
@@ -819,6 +831,7 @@ export function openOperationForm(app, { id = null, preset = null } = {}) {
   }
 
   async function doSave() {
+    syncTyped();
     const cents = readAmount();
     if (cents === null) return;
     const state = app.state;

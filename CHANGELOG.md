@@ -37,8 +37,15 @@
 
 - `core/quotas.js` (moteur des quotas), `ui/annotate.js` (bouton IA), `ui/capture.js` (photo de
   l'écran sans bibliothèque : DOM → SVG → PNG), `ui/quotas-ui.js`.
-- 192 tests du moteur (12 nouveaux) et 62 parcours dans un vrai navigateur (5 nouveaux), dont la
+- 192 tests du moteur (12 nouveaux) et 64 parcours dans un vrai navigateur (7 nouveaux), dont la
   capture réelle d'un écran entouré au doigt et son envoi au faux GitHub.
+
+### Corrigé
+
+- Formulaire d'opération : un libellé, un tiers ou un commentaire mis dans le champ par une
+  suggestion (liste du champ, clavier du téléphone) pouvait se perdre en passant de Dépense à
+  Revenu, ou à l'enregistrement. Ce qui est écrit dans les champs fait désormais foi. Repéré par
+  les tests de GitHub lors de la première tentative de publication de la 2.2.0.
 
 ## 2.1.0 — novembre 2026
 

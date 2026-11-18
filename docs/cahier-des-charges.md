@@ -188,7 +188,7 @@ comportement sur ton téléphone reste à constater (`installer-sur-le-telephone
 | Connexion directe à la banque | Étudié | options et proposition dans `connexion-banque.md` ; demande ton accord et ton compte |
 | Tableau de bord ? | Proposé | en attente de ton choix |
 | Améliorer le rendu visuel | Fait | grand solde, cartes en relief, titres, transitions, poignée des panneaux |
-| Code structuré, tous les tests nécessaires | Fait | 192 tests du moteur, 62 parcours dans un vrai navigateur |
+| Code structuré, tous les tests nécessaires | Fait | 192 tests du moteur, 64 parcours dans un vrai navigateur |
 
 ## Hors périmètre
 
