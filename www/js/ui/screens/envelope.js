@@ -52,7 +52,7 @@ export function createEnvelopeScreen(app, { id }) {
     if (!e) return;
     const options = [{ id: 'edit', label: 'Modifier (nom, couleur, objectif)' }];
     if (!e.closed) {
-      options.push({ id: 'recurring', label: 'Programmer un virement régulier' });
+      options.push({ id: 'recurring', label: 'Programmer une alimentation régulière' });
       options.push({ id: 'close', label: "Clôturer l'enveloppe" });
     } else options.push({ id: 'reopen', label: "Rouvrir l'enveloppe" });
     options.push({ id: 'delete', label: "Supprimer l'enveloppe", danger: true });
@@ -95,7 +95,7 @@ export function createEnvelopeScreen(app, { id }) {
     if (usage.operations) {
       mode = await chooseDialog({
         title: `Supprimer « ${e.name} » ?`,
-        message: `Elle contient ${plural(usage.operations, 'dépense')}. Les virements avec le compte courant disparaissent dans tous les cas.`,
+        message: `Elle contient ${plural(usage.operations, 'dépense')}. Ses alimentations et ses retraits disparaissent dans tous les cas.`,
         options: [
           { id: 'detach', label: 'Garder ses dépenses (elles passent sur le compte courant)', primary: true },
           { id: 'purge', label: 'Supprimer aussi ses dépenses', danger: true },
@@ -195,7 +195,7 @@ export function createEnvelopeScreen(app, { id }) {
       const planned = sortNewestFirst(touching.filter((op) => op.simulated));
       const rules = state.recurring.filter((r) => ruleTouchesEnvelope(r, id));
       if (!planned.length && !rules.length) {
-        content.appendChild(h('div.empty', h('p', "Rien de prévu. Tu peux programmer un virement régulier vers cette enveloppe depuis le menu en haut à droite.")));
+        content.appendChild(h('div.empty', h('p', "Rien de prévu. Tu peux programmer une alimentation régulière de cette enveloppe depuis le menu en haut à droite.")));
       }
       if (rules.length) {
         const list = h('div.menu', { style: { margin: '0 16px 12px' } });

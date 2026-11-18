@@ -8,6 +8,8 @@ import { textField, selectField, pickList, fieldGroup } from '../fields.js';
 import { openTagForm } from '../forms/tag.js';
 import { IMPORTANCE, importanceLabel, SCHEMA_VERSION, STORES } from '../../core/schema.js';
 import { planDeleteTag, tagUsage } from '../../core/tags.js';
+import { quotaStatus, quotaText } from '../../core/quotas.js';
+import { quotaMeter } from '../quotas-ui.js';
 import { planDeleteRule, planSaveRule } from '../../core/rules.js';
 import { checkPin, makePin, PIN_MAX, PIN_MIN } from './lock.js';
 import { deviceSummary, filesBlocked, filesPlace, filesTarget, hasPlugin, isNative, storageEstimate, writeToDocuments } from '../../platform/platform.js';
@@ -54,19 +56,22 @@ export function createTagsScreen(app) {
       );
       return;
     }
-    screen.content.appendChild(h('p.hint', 'Touche un tag pour changer son nom ou sa couleur.'));
+    screen.content.appendChild(h('p.hint', 'Touche un tag pour changer son nom, sa couleur ou son quota (un plafond de dépenses par jour, semaine, mois…).'));
     const menu = h('div.menu');
+    const today = app.today();
     for (const tag of tags) {
       const used = tagUsage(app.state, tag.id);
+      const status = tag.quota ? quotaStatus(app.state, tag, today) : null;
       menu.appendChild(
         h(
           'div.menu-item',
           { class: `k-${tag.color}`, style: { padding: '0' } },
           h(
             'button',
-            { type: 'button', class: 'menu-item', style: { border: '0', flex: '1', minWidth: '0' }, dataset: { tag: tag.id }, onclick: () => openTagForm(app, { id: tag.id }) },
+            { type: 'button', class: 'menu-item', style: { border: '0', flex: '1', minWidth: '0', flexWrap: 'wrap' }, dataset: { tag: tag.id }, onclick: () => openTagForm(app, { id: tag.id }) },
             h('span.chip', h('span.dot'), tag.name),
-            h('span.texts', h('span', used ? plural(used, 'opération') : 'Pas encore utilisé')),
+            h('span.texts', h('span', [used ? plural(used, 'opération') : 'Pas encore utilisé', tag.quota ? ` · quota ${quotaText(tag.quota)}` : ''].join(''))),
+            status ? h('span', { style: { flexBasis: '100%' } }, quotaMeter(status)) : null,
           ),
           h('button.icon-btn', { type: 'button', 'aria-label': `Supprimer le tag ${tag.name}`, dataset: { action: 'delete-tag' }, onclick: () => remove(tag) }, icon('trash')),
         ),

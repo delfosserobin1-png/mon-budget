@@ -53,11 +53,12 @@ const SECTIONS = [
     a: [
       "Une enveloppe réserve de l'argent pour un projet, sans le sortir de ta banque.",
       [
-        "**Alimenter** : un virement du compte courant vers l'enveloppe. +500 € dans l'enveloppe, −500 € sur le compte courant, solde total inchangé.",
+        "**Alimenter** : mettre de l'argent de côté, du compte courant vers l'enveloppe. +500 € dans l'enveloppe, −500 € sur le compte courant, solde total inchangé.",
         "**Dépense** : une dépense payée avec l'enveloppe ne touche pas au compte courant.",
         "**Retirer** ou **Vers une autre** : pour reprendre l'argent ou le déplacer.",
       ],
-      "Une enveloppe ne peut pas être à découvert. Si une dépense dépasse ce qu'elle contient, l'appli te propose de virer la différence depuis le compte courant.",
+      "Dans la liste des opérations, ces mouvements s'appellent **Alimentation**, **Retrait** et **Déplacement**. Ce ne sont ni des dépenses ni des revenus : l'argent reste à la banque.",
+      "Une enveloppe ne peut pas être à découvert. Si une dépense dépasse ce qu'elle contient, l'appli te propose d'y ajouter la différence depuis le compte courant.",
       "Tu peux lui donner un **objectif** (montant, date) : une jauge montre où tu en es et combien mettre de côté chaque mois.",
       "Projet terminé ? **Clôture** l'enveloppe : le reste revient sur le compte courant, l'historique et le bilan restent consultables, et tu peux la rouvrir.",
     ],
@@ -65,7 +66,7 @@ const SECTIONS = [
   {
     q: 'Saisir une opération',
     a: [
-      "Bouton **+**, choisis Dépense, Revenu ou Virement, tape le montant. Le reste est facultatif :",
+      "Bouton **+**, choisis Dépense ou Revenu, tape le montant. Le reste est facultatif :",
       [
         "**Libellé** et **destinataire** : pour t'y retrouver et pour les statistiques.",
         "**Importance** : Nécessité, Confort ou Caprice. Utile pour voir ce que tu pourrais réduire.",
@@ -75,6 +76,19 @@ const SECTIONS = [
       ],
       "Si tu fermes le formulaire par erreur, ta saisie est gardée en brouillon et revient à la prochaine ouverture.",
       "Pour modifier ou supprimer : touche l'opération dans la liste. Pour en traiter plusieurs d'un coup : appui long sur une ligne, ou l'icône de sélection en haut.",
+    ],
+  },
+  {
+    q: 'Les quotas : un plafond par tag',
+    a: [
+      "Un **quota** limite ce que tu dépenses pour un tag : par exemple 400 € de Courses par mois, ou 60 € de Restaurant par semaine.",
+      [
+        "**Régler** : Plus › Tags, touche un tag, active **Quota**, choisis le montant et la période (jour, semaine, mois, année, ou entre deux dates).",
+        "**Suivre** : une jauge apparaît dans Plus › Tags et en haut de l'onglet **Stats**. Touche-la pour voir les dépenses concernées.",
+        "**Être prévenu** : en saisissant une dépense, l'appli te dit si elle fait atteindre 80 % du quota (orange) ou le dépasse (rouge).",
+      ],
+      "Un remboursement portant le même tag redonne de la marge. Les prévisions sont montrées à part (« prévu ») et ne comptent pas encore. La semaine va du lundi au dimanche.",
+      "Un quota prévient, il n'interdit rien.",
     ],
   },
   {
@@ -127,7 +141,7 @@ const SECTIONS = [
     a: [
       "Choisis la période en haut : tous les graphiques suivent. Touche une barre ou une colonne pour voir les opérations correspondantes.",
       "Chaque graphique a une icône tableau, en haut à droite de sa carte, pour lire les chiffres exacts.",
-      "Seules les vraies dépenses et les vrais revenus sont comptés : ni les virements vers les enveloppes, ni les prévisions.",
+      "Seules les vraies dépenses et les vrais revenus sont comptés : ni les mouvements d'enveloppes (alimentations, retraits), ni les prévisions.",
     ],
   },
   {
@@ -158,6 +172,19 @@ const SECTIONS = [
         "**Sans connexion réglée** : le commentaire est gardé dans l'appli et tu le partages à la main (mail, messagerie).",
       ],
       "Claude lit le commentaire, modifie l'appli et te répond : sa réponse s'affiche sous ton commentaire, et un point apparaît sur l'onglet Plus. Tu peux lui répondre au même endroit. Quand c'est réglé, le commentaire passe à **Traité**, et la correction arrive avec la mise à jour suivante.",
+      "Claude relève les commentaires **4 fois par jour** (3 h 30, 9 h, 15 h, 21 h 30), quand l'ordinateur est allumé.",
+    ],
+  },
+  {
+    q: 'Le bouton IA : montrer ce qu\'il faut changer',
+    a: [
+      "L'onglet **IA**, collé au bord droit de l'écran, sert à commenter un endroit précis de l'appli.",
+      [
+        "Touche **IA**, puis **entoure** du doigt ce qui te gêne (ou touche-le simplement). **Effacer** pour recommencer.",
+        "**Continuer** : la capture de l'écran, avec ton entourage, s'affiche. Tes montants y sont remplacés par « ••• € » ; un interrupteur les montre si c'est utile.",
+        "Écris ton commentaire et touche **Envoyer à Claude**.",
+      ],
+      "Claude sait exactement quel élément tu as visé. L'onglet se déplace d'un glissé, vers le haut, vers le bas ou jusqu'au bord gauche ; tu peux le masquer dans Plus › Commentaires pour Claude.",
     ],
   },
   {

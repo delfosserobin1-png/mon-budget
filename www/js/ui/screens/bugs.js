@@ -13,14 +13,15 @@ import { h, clear, plural } from '../dom.js';
 import { icon } from '../icons.js';
 import { subTopbar } from '../shell.js';
 import { alertDialog, confirmDialog, openSheet } from '../overlays.js';
-import { textArea, fieldGroup, segmented, selectField } from '../fields.js';
+import { textArea, fieldGroup, segmented, selectField, toggle } from '../fields.js';
 import { addPhoto, photoThumb } from '../photos.js';
 import { diagnosticsText } from './settings-screens.js';
 import { BUG_REPORT_EMAIL } from '../../config.js';
 import { Draft } from '../../core/changeset.js';
 import { makeBugReport } from '../../core/schema.js';
 import { formatDate } from '../../core/dates.js';
-import { COMMENT_KINDS, SCREEN_NAMES, STATUS_LABELS, commentStatus, kindLabel, screenLabel, unreadReplies } from '../../core/comments.js';
+import { COMMENT_KINDS, SCREEN_NAMES, STATUS_LABELS, commentStatus, kindLabel, screenLabel, targetText, unreadReplies } from '../../core/comments.js';
+import { AI_SETTING } from '../annotate.js';
 import { zipStore } from '../../io/zip.js';
 import { extensionFor } from '../../data/backup.js';
 import { copyText, deviceSummary, saveFile, shareFile, shareText } from '../../platform/platform.js';
@@ -55,7 +56,8 @@ export function createBugsScreen(app, params = {}) {
   const linkHost = h('div');
   const formHost = h('div.card.stack');
   const listHost = h('div');
-  const content = h('div.pad.stack.loose', linkHost, formHost, listHost);
+  const aiHost = h('div.card.stack.tight', { dataset: { card: 'ai-button' } });
+  const content = h('div.pad.stack.loose', linkHost, formHost, listHost, aiHost);
   const el = h('section.screen', { dataset: { screen: 'bugs' } }, top.el, h('main.scroll', content, h('div.bottom-space')));
   const origin = SCREEN_CHOICES.includes(params.from) ? params.from : SCREEN_CHOICES.includes(app.lastPlace?.()) ? app.lastPlace() : 'all';
 
@@ -300,6 +302,7 @@ export function createBugsScreen(app, params = {}) {
       clear(head);
       head.append(
         h('div.chips', statusChip(report), remote ? h('span.chip.plain', `n° ${remote.number}`) : null, h('span.chip.plain', screenLabel(report.screen))),
+        report.target ? h('p.hint', { dataset: { value: 'target' } }, `Élément visé : ${targetText(report.target)}`) : null,
         report.queued && !remote ? h('p.hint', "Ce commentaire attend une connexion : il partira tout seul dès que l'appli pourra joindre la boîte de Claude.") : null,
       );
 
@@ -420,9 +423,22 @@ export function createBugsScreen(app, params = {}) {
     }
   }
 
+  function renderAiSetting() {
+    clear(aiHost);
+    const switcher = toggle({
+      label: 'Bouton IA sur tous les écrans',
+      hint: "L'onglet « IA » sur le bord droit : touche-le, entoure un endroit de l'appli, écris ton commentaire. Fais-le glisser s'il gêne.",
+      checked: app.setting(AI_SETTING, true) !== false,
+      name: 'aiButton',
+      onChange: (value) => app.setSetting(AI_SETTING, value),
+    });
+    aiHost.append(switcher.el);
+  }
+
   function update() {
     renderLink();
     renderActions();
+    renderAiSetting();
     clear(listHost);
     const reports = app.state.bugReports.slice().sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
     if (!reports.length) return;

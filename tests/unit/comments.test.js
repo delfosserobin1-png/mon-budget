@@ -27,6 +27,7 @@ import {
   planRepliesSeen,
   queuedComments,
   screenLabel,
+  targetText,
   threadFromRemote,
   unreadReplies,
   unreadTotal,
@@ -233,4 +234,28 @@ test('journal des versions : la dernière entrée est la version en cours, « qu
   assert.deepEqual(changesSince('2.1.0', '2.2.0', sample).map((e) => e.version), ['2.2.0', '2.1.1']);
   assert.deepEqual(changesSince('2.2.0', '2.2.0', sample), []);
   assert.deepEqual(changesSince('2.0.0', '2.1.0', sample).map((e) => e.version), ['2.1.0'], 'jamais une version plus récente que celle installée');
+});
+
+test('bouton IA : l’élément visé est décrit, mis en forme dans le texte, et relu depuis le marqueur', () => {
+  const target = { screen: 'operations', context: '', path: 'section.screen[data-screen="operations"] > button.fab[data-action="add"]', label: 'Ajouter une opération', role: 'button', rect: { x: 340.4, y: 800, w: 56, h: 56 }, area: { x: 330, y: 790, w: 80, h: 80 }, frame: { w: 412, h: 915 } };
+  const r = makeBugReport(report({ kind: 'idee', text: 'Plus gros, ce bouton.', origin: 'annotation', target }));
+  assert.equal(r.origin, 'annotation');
+  assert.deepEqual(r.target.rect, { x: 340, y: 800, w: 56, h: 56 }, 'positions arrondies');
+  assert.equal(targetText(r.target), 'bouton « Ajouter une opération » — écran « Opérations »');
+  assert.equal(targetText({ ...r.target, role: 'field', label: 'Montant', context: 'feuille « Nouvelle opération »' }), 'champ « Montant » — feuille « Nouvelle opération »');
+  assert.equal(targetText(null), '');
+  const body = commentBody(r);
+  assert.match(body, /\*\*Élément visé\*\* : bouton « Ajouter une opération » — écran « Opérations »\n\n`section\.screen\[data-screen="operations"\] > button\.fab\[data-action="add"\]`/);
+  assert.deepEqual(parseMarker(body).target, r.target, 'le marqueur porte la description complète');
+  // un libellé contenant « --> » ne casse pas le marqueur
+  const tricky = makeBugReport(report({ target: { ...target, label: 'a --> b' } }));
+  const trickyBody = commentBody(tricky);
+  const markerLine = trickyBody.split('\n').find((line) => line.startsWith('<!-- mon-budget'));
+  assert.equal((markerLine.match(/-->/g) || []).length, 1, 'dans le marqueur, un seul « --> » : sa fin');
+  assert.equal(parseMarker(trickyBody).target.label, 'a --> b');
+  // sans bouton IA : rien de tout cela
+  assert.deepEqual([makeBugReport(report()).origin, makeBugReport(report()).target], ['form', null]);
+  assert.ok(!commentBody(makeBugReport(report())).includes('Élément visé'));
+  assert.equal(makeBugReport(report({ origin: 'pirate', target: 'texte' })).origin, 'form');
+  assert.equal(makeBugReport(report({ target: 'texte' })).target, null);
 });

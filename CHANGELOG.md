@@ -1,5 +1,45 @@
 # Journal des versions
 
+## 2.2.0 — novembre 2026
+
+### Nouveau
+
+- **Bouton IA** sur tous les écrans : on le touche, on entoure (ou on touche) un endroit de
+  l'écran, on écrit un commentaire, et il part chez Claude avec une capture de l'écran annotée
+  (montants masqués par défaut) et la description exacte de l'élément visé. Onglet fin, qui ne
+  cache aucun chiffre ; déplaçable le long du bord ou sur le bord gauche, masquable.
+- **Quotas par tag** : un plafond de dépenses par jour, semaine, mois, année ou entre deux dates.
+  Jauges dans Plus › Tags et en tête de Stats ; avertissement au moment de saisir une dépense qui
+  ferait atteindre 80 % ou dépasser. Remboursements déduits, prévisions affichées à part.
+- **Relève programmée** des commentaires par Claude, 4 fois par jour (3 h 30, 9 h, 15 h, 21 h 30),
+  depuis l'appli Claude de l'ordinateur.
+
+### Changé
+
+- Le bouton + ne propose plus que **Dépense** et **Revenu**. Les mouvements d'enveloppe se font
+  depuis la fiche de l'enveloppe et portent un nom clair : **Alimentation**, **Retrait**,
+  **Déplacement** (« Mise de côté » pour une récurrence). Le mot « virement » n'est plus employé
+  que pour les vrais virements bancaires.
+- Rendu : centimes plus discrets dans le grand solde, milliers mieux séparés dans les grands
+  chiffres, relief léger sous les cartes, titres plus fins, transitions douces entre les écrans,
+  poignée sur les panneaux.
+
+### Pas fait, à décider
+
+- **Traitement immédiat** des commentaires (dès l'envoi, ordinateur allumé en permanence) : il
+  faudrait un Claude lancé automatiquement, sans personne pour le surveiller, qui modifie et publie
+  l'appli. Le garde-fou de sécurité de Claude a refusé de l'installer de lui-même. Si tu le veux
+  quand même, c'est toi qui installes Claude Code en ligne de commande (une commande) et
+  t'y connectes ; on construira alors le programme de surveillance ensemble.
+- **Connexion directe à la banque** : options et proposition dans `docs/connexion-banque.md`.
+
+### Sous le capot
+
+- `core/quotas.js` (moteur des quotas), `ui/annotate.js` (bouton IA), `ui/capture.js` (photo de
+  l'écran sans bibliothèque : DOM → SVG → PNG), `ui/quotas-ui.js`.
+- 192 tests du moteur (12 nouveaux) et 62 parcours dans un vrai navigateur (5 nouveaux), dont la
+  capture réelle d'un écran entouré au doigt et son envoi au faux GitHub.
+
 ## 2.1.0 — novembre 2026
 
 L'appli s'installe sans APK, se met à jour toute seule, et l'on peut écrire à Claude depuis l'appli.

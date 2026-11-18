@@ -2,7 +2,7 @@
 // Une seule ligne de filtres en haut (période + périmètre) : tous les graphiques en dépendent,
 // pour que les chiffres soient toujours comparables entre eux.
 
-import { h, clear, plural } from '../dom.js';
+import { h, clear, displayAmount, plural } from '../dom.js';
 import { icon } from '../icons.js';
 import { selectField } from '../fields.js';
 import { chartCard, columnChart, heatCalendar, hideChartTooltip, legend, lineChart, rankedBars, segmentedBar } from '../charts/charts.js';
@@ -10,6 +10,7 @@ import * as stats from '../../core/stats.js';
 import { emptyFilter } from '../../core/filters.js';
 import { formatAmount } from '../../core/money.js';
 import { addMonths, daysInMonth, endOfMonth, formatDate, makeISO, monthKey, monthName, monthRange, parts, weekday } from '../../core/dates.js';
+import { quotaCard } from '../quotas-ui.js';
 
 const IMPORTANCE_STYLE = {
   necessite: { color: 'var(--viz-ord-1)', text: 'var(--viz-ord-1-t)' },
@@ -101,6 +102,10 @@ export function createStatsScreen(app) {
     const custom = { period: 'custom', from: range.from, to: range.to < today ? range.to : today, account: scope };
     clear(content);
 
+    // Quotas des tags : toujours la période en cours (indépendamment de la période choisie au-dessus).
+    const quotas = quotaCard(app, { onOpen: (status) => openOperations({ period: 'custom', from: status.from, to: status.to < today ? status.to : today, tags: [status.tagId], types: ['expense', 'income'] }) });
+    if (quotas) content.appendChild(quotas);
+
     const hasData = state.operations.some((op) => !op.simulated);
     if (!hasData) {
       content.appendChild(
@@ -113,20 +118,20 @@ export function createStatsScreen(app) {
     const summary = stats.summarize(state, range);
     const tiles = h('div.tiles');
     tiles.appendChild(
-      h('div.tile', { dataset: { tile: 'expense' } }, h('div.label', 'Dépenses'), h('span.value', formatAmount(summary.expense)), summary.previous ? delta(summary.expense, summary.previous.expense, { upIsGood: false, partial: summary.partial }) : null),
+      h('div.tile', { dataset: { tile: 'expense' } }, h('div.label', 'Dépenses'), h('span.value', displayAmount(summary.expense)), summary.previous ? delta(summary.expense, summary.previous.expense, { upIsGood: false, partial: summary.partial }) : null),
     );
     tiles.appendChild(
-      h('div.tile', { dataset: { tile: 'income' } }, h('div.label', 'Revenus'), h('span.value', formatAmount(summary.income)), summary.previous ? delta(summary.income, summary.previous.income, { upIsGood: true, partial: summary.partial }) : null),
+      h('div.tile', { dataset: { tile: 'income' } }, h('div.label', 'Revenus'), h('span.value', displayAmount(summary.income)), summary.previous ? delta(summary.income, summary.previous.income, { upIsGood: true, partial: summary.partial }) : null),
     );
     tiles.appendChild(
       h(
         'div.tile',
         { dataset: { tile: 'net' } },
         h('div.label', 'Revenus moins dépenses'),
-        h('span', { class: summary.net < 0 ? 'value alert' : summary.net > 0 ? 'value pos' : 'value' }, formatAmount(summary.net, { sign: 'always' })),
+        h('span', { class: summary.net < 0 ? 'value alert' : summary.net > 0 ? 'value pos' : 'value' }, displayAmount(summary.net, { sign: 'always' })),
       ),
     );
-    tiles.appendChild(h('div.tile', h('div.label', 'Dépense moyenne par jour'), h('span.value', formatAmount(summary.perDay)), h('div.delta', `sur ${plural(summary.days, 'jour')}`)));
+    tiles.appendChild(h('div.tile', h('div.label', 'Dépense moyenne par jour'), h('span.value', displayAmount(summary.perDay)), h('div.delta', `sur ${plural(summary.days, 'jour')}`)));
     content.appendChild(tiles);
     if (summary.biggest) {
       content.appendChild(

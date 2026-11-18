@@ -120,6 +120,10 @@ export function commentTitle(report) {
  */
 export function commentBody(report, { attachments = [], notes = [] } = {}) {
   const lines = [`**${kindLabel(report.kind)}** — écran « ${screenLabel(report.screen)} » — Mon Budget ${report.appVersion || '?'}`, '', String(report.text || '').trim()];
+  if (report.target) {
+    lines.push('', `**Élément visé** : ${targetText(report.target)}`);
+    if (report.target.path) lines.push('', `\`${String(report.target.path).replace(/`/g, "'")}\``);
+  }
   if (report.steps) lines.push('', '**Juste avant**', '', String(report.steps).trim());
   if (attachments.length) {
     lines.push('', `**${attachments.length > 1 ? 'Captures jointes' : 'Capture jointe'}**`, '');
@@ -132,8 +136,24 @@ export function commentBody(report, { attachments = [], notes = [] } = {}) {
     lines.push('', '<details><summary>Informations techniques</summary>', '', '````text', safe, '````', '', '</details>');
   }
   const marker = { id: report.id, kind: report.kind || 'bug', screen: report.screen || '', version: report.appVersion || '', at: report.createdAt || '', captures: attachments };
-  lines.push('', `<!-- mon-budget ${JSON.stringify(marker)} -->`);
+  if (report.target) marker.target = report.target;
+  // « --> » fermerait le commentaire HTML : on l'écrit autrement (le JSON reste identique une fois relu)
+  lines.push('', `<!-- mon-budget ${JSON.stringify(marker).replace(/-->/g, '--\\u003e')} -->`);
   return lines.join('\n');
+}
+
+const ROLE_NAMES = { button: 'bouton', field: 'champ', title: 'titre', row: 'ligne', card: 'carte', menu: 'élément de menu', tab: 'onglet', zone: 'zone' };
+
+/**
+ * L'élément d'un commentaire « entouré » au bouton IA, en une phrase :
+ * « bouton « Ajouter une opération » — écran « Opérations » ».
+ */
+export function targetText(target) {
+  if (!target) return '';
+  const role = ROLE_NAMES[target.role] || target.role || 'zone';
+  const label = target.label ? ` « ${target.label} »` : '';
+  const where = target.context ? target.context : `écran « ${screenLabel(target.screen)} »`;
+  return `${role}${label} — ${where}`;
 }
 
 /** Relit le marqueur d'un corps d'issue (le dernier, s'il y en a plusieurs). Renvoie l'objet ou null. */

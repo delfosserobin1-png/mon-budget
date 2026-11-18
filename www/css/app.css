@@ -427,8 +427,10 @@ svg.icon.lg { width: 28px; height: 28px; }
 /* En-tête des soldes (écran Opérations) */
 .balances { padding: 4px 16px 14px; }
 .balances .label { display: flex; align-items: center; gap: 2px; color: var(--ink-2); font-size: 14px; }
-.balance-main { font-family: "Inter Display", "Inter", system-ui, sans-serif; font-weight: 600; font-size: 38px; line-height: 1.1; letter-spacing: -0.02em; margin-top: 2px; }
+.balance-main { font-family: "Inter Display", "Inter", system-ui, sans-serif; font-weight: 600; font-size: 40px; line-height: 1.1; letter-spacing: -0.025em; margin-top: 2px; }
+.balance-main .dec { font-size: 0.55em; font-weight: 500; letter-spacing: 0; color: var(--ink-2); margin-left: 1px; }
 .balance-main.alert { color: var(--red); }
+.balance-main.alert .dec { color: inherit; opacity: 0.8; }
 .balances .second { display: flex; align-items: center; flex-wrap: wrap; gap: 2px 14px; margin-top: 8px; font-size: 14px; color: var(--ink-2); }
 .balances .second .amt { color: var(--ink); font-weight: 600; }
 
@@ -810,6 +812,78 @@ table.data td.n, table.data th.n { text-align: right; font-variant-numeric: tabu
 .msg.me { align-self: flex-end; background: var(--blue-tint); border-bottom-right-radius: 4px; }
 .msg.claude { align-self: flex-start; background: var(--surface); border: 1px solid var(--rule); border-bottom-left-radius: 4px; }
 .msg .photos { margin-top: 8px; white-space: normal; }
+/* ---------- 9. Quotas de tags ---------- */
+.card-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.quota-row { display: flex; flex-direction: column; gap: 6px; width: 100%; padding: 10px 2px; border: 0; border-top: 1px solid var(--rule); background: none; text-align: left; border-radius: 0; }
+.card-head + .quota-row { border-top: 0; }
+.quota-row:active { background: var(--sunken); }
+.quota-name { display: flex; align-items: center; gap: 8px; min-width: 0; font-size: 14.5px; }
+.quota-name .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--k, var(--ink-3)); flex: none; }
+.quota-name b { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.quota-name small { margin-left: auto; color: var(--ink-3); font-size: 12.5px; white-space: nowrap; }
+.quota-meter { display: flex; flex-direction: column; gap: 4px; width: 100%; }
+.quota-track { display: flex; height: 8px; border-radius: 4px; background: var(--sunken); overflow: hidden; }
+.quota-track i { display: block; height: 100%; }
+.quota-track .spent { background: var(--green); }
+.quota-meter.warn .spent { background: var(--amber); }
+.quota-meter.over .spent { background: var(--red); }
+.quota-meter.idle .spent { background: var(--graphite); }
+.quota-track .planned { background: repeating-linear-gradient(135deg, var(--graphite) 0 2px, transparent 2px 5px); opacity: 0.7; }
+.quota-legend { display: flex; justify-content: space-between; gap: 10px; font-size: 12.5px; color: var(--ink-3); }
+.quota-legend .num { color: var(--ink-2); font-weight: 500; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.quota-legend .what { text-align: right; min-width: 0; }
+.quota-meter.over .quota-legend .what { color: var(--red); font-weight: 500; }
+.hint svg.icon.sm { vertical-align: -3px; }
+
+/* ---------- 10. Bouton IA et mode « entourer » ---------- */
+/* Un onglet fin collé au bord : dans les listes, il ne couvre que le « € » des montants. */
+.ai-fab {
+  position: absolute; right: 0; top: 42%; z-index: 45; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  width: 26px; height: 54px; padding: 0 0 0 2px; border: 0; border-radius: 14px 0 0 14px;
+  background: linear-gradient(165deg, var(--blue), color-mix(in srgb, var(--blue) 62%, #8a4fd6)); color: var(--on-blue);
+  box-shadow: -2px 3px 10px rgba(26, 34, 56, 0.2); font-size: 9.5px; font-weight: 700; letter-spacing: 0.04em; touch-action: none; opacity: 0.94;
+}
+.ai-fab.left { right: auto; left: 0; padding: 0 2px 0 0; border-radius: 0 14px 14px 0; box-shadow: 2px 3px 10px rgba(26, 34, 56, 0.2); }
+/* zone de toucher un peu plus large que le dessin, vers l'intérieur de l'écran */
+.ai-fab::after { content: ""; position: absolute; top: -4px; bottom: -4px; left: -6px; right: 0; }
+.ai-fab.left::after { left: 0; right: -6px; }
+.ai-fab svg.icon { width: 15px; height: 15px; }
+.ai-fab:active, .ai-fab.dragging { opacity: 1; transform: translateX(-2px); }
+.ai-fab.left:active, .ai-fab.left.dragging { transform: translateX(2px); }
+.frame:has(.lock) .ai-fab, .frame:has(.annotate-layer) .ai-fab, .frame:has(.viewer) .ai-fab { display: none; }
+.annotate-layer { position: absolute; inset: 0; z-index: 70; touch-action: none; }
+.annotate-canvas { position: absolute; inset: 0; width: 100%; height: 100%; cursor: crosshair; background: color-mix(in srgb, var(--blue) 7%, transparent); }
+.annotate-bar {
+  position: absolute; left: 8px; right: 8px; top: calc(8px + env(safe-area-inset-top, 0px)); display: flex; align-items: center; gap: 6px;
+  padding: 8px 8px 8px 14px; border-radius: 16px; background: var(--surface); box-shadow: var(--shadow); font-size: 14px; font-weight: 500; color: var(--ink);
+}
+.annotate-bar.at-bottom { top: auto; bottom: calc(8px + env(safe-area-inset-bottom, 0px)); }
+.annotate-bar .grow { min-width: 0; line-height: 1.3; }
+.annotate-preview { margin: 0; border: 1px solid var(--rule); border-radius: 14px; overflow: hidden; background: var(--sunken); }
+.annotate-preview img { display: block; width: 100%; max-height: 46vh; object-fit: contain; }
+
+/* ---------- 11. Finitions ---------- */
+/* un peu de relief sous les cartes, les menus et les tuiles */
+.card, .menu, .tile { box-shadow: var(--shadow-soft); }
+/* titres des onglets : la même police que les grands montants */
+.topbar:not(.sub) h1 { font-family: "Inter Display", "Inter", system-ui, sans-serif; font-size: 23px; letter-spacing: -0.02em; }
+/* bouton + : un léger dégradé et une ombre colorée */
+.fab { background: linear-gradient(160deg, var(--blue), var(--blue-press)); box-shadow: 0 6px 18px color-mix(in srgb, var(--blue) 35%, transparent), var(--shadow); }
+/* poignée des panneaux qui montent du bas */
+.sheet::before { content: ""; position: absolute; top: 7px; left: 50%; width: 38px; height: 4px; margin-left: -19px; border-radius: 2px; background: var(--rule-strong); }
+.sheet-head { padding-top: 16px; }
+/* changement d'écran en douceur : fondu pour les onglets, glissé pour les sous-écrans */
+.screen:not([hidden]) { animation: screen-in 0.18s ease-out; }
+.screen:not([hidden]):has(> .topbar.sub) { animation-name: screen-push; }
+@keyframes screen-in { from { opacity: 0.35; } }
+@keyframes screen-push { from { opacity: 0.6; transform: translateX(18px); } }
+::selection { background: color-mix(in srgb, var(--blue) 25%, transparent); }
+/* grands montants : l'espace des milliers un peu plus visible (« 1 366,25 € » et non « 1366,25 € ») */
+.thsep { margin-left: 0.09em; }
+@media (prefers-reduced-motion: reduce) {
+  .screen:not([hidden]) { animation: none !important; }
+}
+
 /* « Quoi de neuf » après une mise à jour */
 .whats-new { display: flex; flex-direction: column; gap: 14px; margin-top: 10px; }
 .whats-new h3 { margin: 0; font-size: 15px; font-weight: 600; }

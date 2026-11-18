@@ -5,7 +5,7 @@ rapprochement avec la banque, statistiques. Elle s'installe sur le téléphone c
 normale, marche sans connexion, et tes comptes restent sur le téléphone : ils ne sont jamais envoyés
 sur internet.
 
-Version 2.1.0, en ligne : **https://delfosserobin1-png.github.io/mon-budget/**
+Version 2.2.0, en ligne : **https://delfosserobin1-png.github.io/mon-budget/**
 
 ## Par où commencer
 
@@ -39,7 +39,10 @@ Version 2.1.0, en ligne : **https://delfosserobin1-png.github.io/mon-budget/**
 - **Appli installable** : icône sur l'écran d'accueil, plein écran, fonctionnement sans connexion,
   mises à jour automatiques annoncées par un bandeau, « Quoi de neuf » après chaque mise à jour.
 - **Commentaires pour Claude** : un problème, une idée, une question, écrits dans l'appli avec une
-  capture d'écran ; la réponse de Claude s'affiche sous le commentaire.
+  capture d'écran ; la réponse de Claude s'affiche sous le commentaire. Le **bouton IA** permet
+  d'entourer directement l'endroit de l'écran concerné. Claude relève les commentaires 4 fois par jour.
+- **Quotas par tag** : un plafond de dépenses par jour, semaine, mois, année ou entre deux dates,
+  avec jauges et avertissement à la saisie.
 - **Et aussi** : mode d'emploi intégré, code de verrouillage, thème clair ou sombre, données
   d'exemple pour découvrir.
 
@@ -47,7 +50,7 @@ Version 2.1.0, en ligne : **https://delfosserobin1-png.github.io/mon-budget/**
 
 ```
 www/            l'appli (c'est ce dossier qui est publié, et embarqué dans l'APK)
-tests/          180 tests du moteur + 57 parcours dans un vrai navigateur
+tests/          192 tests du moteur + 62 parcours dans un vrai navigateur
 tools/          serveur local, liste des fichiers hors connexion, publication, lecture des
                 commentaires, fichier unique, APK
 docs/           installation, connexion à Claude, publication, architecture, décisions, cahier des

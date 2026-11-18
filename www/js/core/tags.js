@@ -1,10 +1,31 @@
 // Règles métier des tags (catégories libres).
 
 import { Draft } from './changeset.js';
-import { COLORS, makeTag } from './schema.js';
+import { COLORS, QUOTA_PERIODS, makeTag } from './schema.js';
+import { isValidISO } from './dates.js';
 import { normalize } from './text.js';
 
 const err = (field, message, code = 'invalid') => ({ field, message, code });
+
+/**
+ * Vérifie un quota saisi : { amount (centimes), period, from?, to? } ou null (pas de quota).
+ * Renvoie { quota, errors } ; les champs d'erreur sont quotaAmount, quotaFrom, quotaTo.
+ */
+export function validateQuota(input) {
+  if (input === null || input === undefined || input === false) return { quota: null, errors: [] };
+  const errors = [];
+  const amount = Number(input.amount);
+  if (!Number.isInteger(amount) || amount <= 0) errors.push(err('quotaAmount', 'Indique le montant à ne pas dépasser.'));
+  const period = QUOTA_PERIODS.some((p) => p.id === input.period) ? input.period : null;
+  if (!period) errors.push(err('quotaPeriod', 'Choisis une période.'));
+  if (period === 'custom') {
+    if (!isValidISO(input.from)) errors.push(err('quotaFrom', 'Choisis la date de début.'));
+    if (!isValidISO(input.to)) errors.push(err('quotaTo', 'Choisis la date de fin.'));
+    else if (isValidISO(input.from) && input.to < input.from) errors.push(err('quotaTo', 'La fin doit venir après le début.'));
+  }
+  if (errors.length) return { quota: null, errors };
+  return { quota: period === 'custom' ? { amount, period, from: input.from, to: input.to } : { amount, period, from: null, to: null }, errors };
+}
 
 /** Couleur la moins utilisée, pour varier automatiquement. */
 export function nextColor(items) {
@@ -13,10 +34,20 @@ export function nextColor(items) {
   return [...counts.entries()].sort((a, b) => a[1] - b[1])[0][0];
 }
 
+/**
+ * Crée ou modifie un tag. input : { id?, name, color?, quota? } — quota absent : inchangé ;
+ * quota null : retiré ; sinon vérifié par validateQuota.
+ */
 export function planSaveTag(state, input) {
   const existing = input.id ? state.tags.find((t) => t.id === input.id) : null;
   if (input.id && !existing) return { ok: false, errors: [err('id', "Ce tag n'existe plus.", 'missing')] };
-  const tag = makeTag({ color: nextColor(state.tags), ...(existing || {}), ...input });
+  let fields = input;
+  if ('quota' in input) {
+    const checked = validateQuota(input.quota);
+    if (checked.errors.length) return { ok: false, errors: checked.errors };
+    fields = { ...input, quota: checked.quota };
+  }
+  const tag = makeTag({ color: nextColor(state.tags), ...(existing || {}), ...fields });
   if (!tag.name) return { ok: false, errors: [err('name', 'Donne un nom à ce tag.')] };
   const twin = state.tags.find((t) => t.id !== tag.id && normalize(t.name) === normalize(tag.name));
   if (twin) return { ok: false, errors: [err('name', 'Ce tag existe déjà.', 'duplicate')], twin };

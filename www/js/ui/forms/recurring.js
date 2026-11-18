@@ -1,4 +1,5 @@
-// Formulaire d'une récurrence : dépense, revenu ou virement interne qui revient à intervalle fixe.
+// Formulaire d'une récurrence : dépense, revenu ou mise de côté (mouvement d'enveloppe) qui revient
+// à intervalle fixe.
 
 import { h, clear, plural } from '../dom.js';
 import { icon } from '../icons.js';
@@ -74,7 +75,7 @@ export function openRecurringForm(app, { id = null, preset = null } = {}) {
         options: [
           { value: 'expense', label: 'Dépense' },
           { value: 'income', label: 'Revenu' },
-          { value: 'transfer', label: 'Virement' },
+          { value: 'transfer', label: 'Mise de côté' },
         ],
         onChange: (mode) => {
           f.mode = mode;

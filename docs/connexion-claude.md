@@ -61,6 +61,23 @@ ce qui coupe la connexion.
 Le jeton reste dans les réglages de l'appli, sur ton téléphone. Il ne figure dans aucune sauvegarde
 ni aucun export, n'est jamais affiché, et « Déconnecter » l'efface.
 
+## Le bouton IA : montrer du doigt ce qu'il faut changer
+
+Sur tous les écrans, un onglet **IA** est collé au bord droit. S'il gêne, fais-le glisser plus
+haut, plus bas ou jusqu'au bord gauche ; tu peux aussi le masquer dans Plus › Commentaires pour
+Claude.
+
+1. Touche **IA** : l'écran se fige légèrement teinté.
+2. **Entoure** du doigt ce que tu veux commenter (un bouton, un total, une ligne…), ou **touche-le**
+   simplement : il s'encadre en rouge. « Effacer » pour recommencer.
+3. **Continuer** : une capture de l'écran, avec ton entourage en rouge, s'affiche au-dessus du
+   commentaire. Tes montants y sont remplacés par « ••• € » (un interrupteur les montre si c'est
+   utile, par exemple pour un total faux) ; tu peux aussi ne pas joindre la capture.
+4. Écris ton commentaire, choisis Problème, Idée ou Question, et **Envoyer à Claude**.
+
+Claude reçoit, en plus de ton texte et de la capture, l'**élément visé** : l'écran, la feuille
+ouverte, et le chemin exact dans le code. Il sait donc précisément de quoi tu parles.
+
 ## Écrire, suivre, répondre
 
 **Plus › Commentaires pour Claude** : choisis Problème, Idée ou Question, écris, joins une capture
@@ -79,8 +96,14 @@ Touche un commentaire pour lire le fil et répondre. Répondre à un commentaire
 
 ## Comment Claude s'en occupe
 
-Claude ne surveille pas la boîte en permanence : il la relève quand tu le lui demandes. Dans
-l'appli Claude (sur l'ordinateur, ou sur le téléphone), ouvre le projet et écris par exemple :
+**Automatiquement, 4 fois par jour** (3 h 30, 9 h, 15 h, 21 h 30) : une tâche programmée de
+l'appli Claude de ton ordinateur relève la boîte et traite ce qui attend. Il faut que l'ordinateur
+soit allumé et l'appli Claude ouverte ; sinon, la relève se fait à la prochaine ouverture. Tu la
+retrouves (et peux la modifier ou la mettre en pause) dans l'appli Claude, rubrique des tâches
+programmées.
+
+**À la demande**, quand tu veux : dans l'appli Claude (sur l'ordinateur, ou sur le téléphone), ouvre
+le projet et écris par exemple :
 
 > Traite mes commentaires.
 
@@ -88,9 +111,14 @@ Claude lance alors `npm run commentaires -- lire`, traite chaque commentaire (mo
 publie la nouvelle version, puis répond et clôt avec `npm run commentaires -- clore <n°> "…"`. La
 marche complète est décrite dans `CLAUDE.md`.
 
-Pour que ce soit entièrement automatique (Claude relève la boîte tout seul, par exemple chaque
-soir), il est possible de programmer une tâche récurrente dans l'appli Claude : demande-le à Claude
-une fois la publication en place.
+Lors d'une relève automatique, personne ne regarde Claude travailler : il ne fait donc que les
+demandes claires et sans risque, et répond par une question dans l'appli pour tout le reste
+(détails dans `CLAUDE.md`, section « Traiter les commentaires »).
+
+Un traitement **immédiat**, à la minute où tu envoies, demanderait un Claude qui tourne en
+permanence sur l'ordinateur et modifie l'appli sans que personne ne le lance. Le garde-fou de
+sécurité de Claude a refusé de le mettre en place de lui-même ; c'est à toi d'en décider
+(voir `CHANGELOG.md`, version 2.2.0).
 
 ### Demander une modification sans passer par l'appli
 

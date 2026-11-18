@@ -25,6 +25,7 @@ import { filesBlocked, onResume, requestPersistence } from '../platform/platform
 import { FOLDER_KEY, allowFolder, chooseFolder, folderInfo, forgetFolder, initFolder } from '../platform/folder.js';
 import { applyUpdate, checkForUpdate, initPwa, onPwaChange, promptInstall, pwaState, reserveInfo } from '../platform/pwa.js';
 import { showWhatsNew } from './pwa-ui.js';
+import { installAiButton } from './annotate.js';
 import { openOperationForm } from './forms/operation.js';
 import { createOperationsScreen } from './screens/operations.js';
 import { createEnvelopesScreen } from './screens/envelopes.js';
@@ -36,7 +37,7 @@ import { SUB_SCREENS } from './screens/sub-screens.js';
 import { createLock } from './screens/lock.js';
 import { maybeOnboard } from './screens/onboarding.js';
 
-export const APP_VERSION = '2.1.0';
+export const APP_VERSION = '2.2.0';
 const LOCK_AFTER_MS = 60 * 1000;
 // Réglages propres à l'appareil (connexion à Claude, dossier de copie) : « Tout effacer » les garde.
 const DEVICE_SETTINGS_PREFIX = 'link:';
@@ -259,9 +260,12 @@ export async function boot(mount = document.getElementById('app')) {
   // Point d'attention sur l'onglet « Plus » : sauvegarde conseillée, réponse de Claude à lire, ou
   // dossier de copie à réautoriser.
   const refreshBadges = () => shell.setBadge('more', !!backupReminderFor(store) || unreadTotal(store.state) > 0 || filesBlocked());
+  // Bouton IA : entourer un endroit de l'appli et le commenter pour Claude (ui/annotate.js)
+  const aiButton = installAiButton(app, shell.el);
   store.subscribe(() => {
     shell.refresh();
     refreshBadges();
+    aiButton.refresh();
   });
   refreshBadges();
   shell.showTab('operations');

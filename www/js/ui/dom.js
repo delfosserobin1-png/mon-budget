@@ -86,6 +86,34 @@ export function amount(cents, { sign = 'auto', colored = false, alertNegative = 
   return h('span', { class: cls }, formatAmount(cents, { sign }));
 }
 
+const THIN = ' '; // séparateur de milliers de formatAmount
+
+/** L'espace des milliers, glissée dans un span.thsep que le CSS élargit un peu : en grand, elle se voit à peine. */
+function spaceThousands(text) {
+  const out = [];
+  text.split(THIN).forEach((part, i) => {
+    if (i) out.push(h('span.thsep', THIN));
+    if (part) out.push(part);
+  });
+  return out;
+}
+
+/** Montant affiché en grand (tuiles des statistiques) : même texte, milliers bien séparés. */
+export function displayAmount(cents, { sign = 'auto' } = {}) {
+  return spaceThousands(formatAmount(cents, { sign }));
+}
+
+/**
+ * Grand montant (en-tête des soldes) : les euros en grand, « ,34 € » plus discret. Le texte lu
+ * reste « 1 978,34 € » (les morceaux se suivent sans rien ajouter).
+ */
+export function bigAmount(cents, { sign = 'auto' } = {}) {
+  const text = formatAmount(cents, { sign });
+  const comma = text.lastIndexOf(',');
+  if (comma < 0) return text;
+  return [h('span.int', spaceThousands(text.slice(0, comma))), h('span.dec', text.slice(comma))];
+}
+
 /** « 1 opération », « 3 opérations » */
 export function plural(n, one, many = `${one}s`) {
   return `${n} ${n > 1 ? many : one}`;

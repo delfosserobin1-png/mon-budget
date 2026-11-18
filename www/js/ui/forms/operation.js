@@ -1,4 +1,5 @@
-// Formulaire d'une opération : dépense, revenu, virement interne (ou ajustement existant).
+// Formulaire d'une opération : dépense ou revenu ; mouvement d'enveloppe (alimentation, retrait,
+// déplacement) quand il est ouvert depuis la fiche d'une enveloppe ; ajustement existant.
 // Une seule feuille pour créer et pour modifier. Pendant une création, la saisie est gardée en
 // brouillon à chaque frappe : si on ferme par erreur, on retrouve tout en rouvrant.
 
@@ -7,13 +8,14 @@ import { icon } from '../icons.js';
 import { openSheet, confirmDialog, chooseDialog } from '../overlays.js';
 import { amountField, dateField, timeField, textField, textArea, selectField, segmented, pickList, toggle, fieldGroup } from '../fields.js';
 import { KIND, IMPORTANCE, FREQUENCIES, frequencyLabel } from '../../core/schema.js';
-import { planSaveOperation, planSaveTransfer, planCreditThenTransfer, planDeleteOperations, planConfirmSimulation, topupChangeset, accountName } from '../../core/operations.js';
+import { planSaveOperation, planSaveTransfer, planCreditThenTransfer, planDeleteOperations, planConfirmSimulation, topupChangeset, accountName, moveDoneLabel, moveTitle } from '../../core/operations.js';
 import { planSaveAdjustment } from '../../core/reconciliation.js';
 import { planSaveRecurring, countBackfill } from '../../core/recurring.js';
 import { computeBalances } from '../../core/balances.js';
 import { Draft, merge, put } from '../../core/changeset.js';
 import { learnInto, suggestFor } from '../../core/rules.js';
-import { formatAmount, formatForInput } from '../../core/money.js';
+import { formatAmount, formatForInput, parseAmount } from '../../core/money.js';
+import { impactText, quotaImpact } from '../../core/quotas.js';
 import { formatDate, nowTime } from '../../core/dates.js';
 import { addPhoto, photoThumb } from '../photos.js';
 import { askNewTag } from './tag.js';
@@ -99,6 +101,8 @@ export function openOperationForm(app, { id = null, preset = null } = {}) {
       f.time = nowTime();
     }
     if (preset) f = { ...f, ...preset, time: preset.time === undefined ? f.time : preset.time };
+    // Le bouton + ne propose plus que Dépense et Revenu : un ancien brouillon de « virement » repart en dépense.
+    if (!preset && f.mode === 'transfer') f.mode = 'expense';
   }
   const rule = existing?.recurringId ? app.state.recurring.find((r) => r.id === existing.recurringId) : null;
 
@@ -136,8 +140,8 @@ export function openOperationForm(app, { id = null, preset = null } = {}) {
   saveBtn.addEventListener('click', () => save());
 
   function titleFor() {
+    if (f.mode === 'transfer') return moveTitle(f.from, f.to);
     if (!existing) return 'Nouvelle opération';
-    if (f.mode === 'transfer') return 'Virement interne';
     if (f.mode === 'adjustment') return existing.auto === 'opening' ? 'Solde de départ' : 'Ajustement';
     return 'Opération';
   }
@@ -170,6 +174,7 @@ export function openOperationForm(app, { id = null, preset = null } = {}) {
 
   function build() {
     clear(body);
+    quotaHost = null;
     for (const key of Object.keys(fields)) delete fields[key];
     if (f.mode === 'transfer' && !existing && !f.from && !f.to) {
       const first = app.state.envelopes.find((e) => !e.closed);
@@ -200,24 +205,8 @@ export function openOperationForm(app, { id = null, preset = null } = {}) {
       );
     }
 
-    // --- type ---
-    if (!existing) {
-      const seg = segmented({
-        label: 'Type',
-        value: f.mode,
-        options: [
-          { value: 'expense', label: 'Dépense' },
-          { value: 'income', label: 'Revenu' },
-          { value: 'transfer', label: 'Virement' },
-        ],
-        onChange: (mode) => {
-          f.mode = mode;
-          touch();
-          render();
-        },
-      });
-      body.appendChild(seg.el);
-    } else if (f.mode === 'expense' || f.mode === 'income') {
+    // --- type --- (les mouvements d'enveloppe se font depuis la fiche de l'enveloppe : Alimenter, Retirer…)
+    if (f.mode === 'expense' || f.mode === 'income') {
       const seg = segmented({
         label: 'Type',
         value: f.mode,
@@ -255,6 +244,7 @@ export function openOperationForm(app, { id = null, preset = null } = {}) {
       onInput: (text) => {
         f.amountText = text;
         touch();
+        updateQuotaHint();
       },
     });
     fields.amount.raw = f.amountText;
@@ -274,6 +264,7 @@ export function openOperationForm(app, { id = null, preset = null } = {}) {
         f.date = value;
         touch();
         updateDateHint();
+        updateQuotaHint();
       },
     });
     fields.time = timeField({
@@ -294,6 +285,20 @@ export function openOperationForm(app, { id = null, preset = null } = {}) {
     if (!dateHint) return;
     const future = f.date && f.date > today && !f.simulated && !f.repeat;
     dateHint.hidden = !future;
+  }
+
+  // Quotas des tags : on prévient avant d'enregistrer une dépense qui les ferait (presque) atteindre.
+  let quotaHost = null;
+  function updateQuotaHint() {
+    if (!quotaHost) return;
+    clear(quotaHost);
+    if (f.mode !== 'expense' || !f.tags.length) return;
+    const cents = f.amountText && f.amountText.trim() ? parseAmount(f.amountText) : null;
+    if (!cents) return;
+    const impacts = quotaImpact(app.state, { id: existing?.id || null, date: f.date || today, amount: -Math.abs(cents), tags: f.tags, simulated: f.simulated });
+    for (const impact of impacts) {
+      quotaHost.appendChild(h('div', { class: impact.level === 'over' ? 'notice bad' : 'notice warn', dataset: { notice: 'quota', tag: impact.tagId, level: impact.level } }, icon('target'), h('div.grow', impactText(impact, today))));
+    }
   }
 
   function optionsBlock({ allowRepeat }) {
@@ -514,6 +519,7 @@ export function openOperationForm(app, { id = null, preset = null } = {}) {
         f.tags = list;
         touch();
         showHabit();
+        updateQuotaHint();
       },
     });
     newTag.addEventListener('click', async () => {
@@ -524,6 +530,9 @@ export function openOperationForm(app, { id = null, preset = null } = {}) {
       render();
     });
     body.appendChild(fieldGroup('Tags', tags.el));
+    quotaHost = h('div.stack.tight', { dataset: { block: 'quota-hint' } });
+    body.appendChild(quotaHost);
+    updateQuotaHint();
 
     fields.comment = textArea({
       label: 'Commentaire',
@@ -579,7 +588,7 @@ export function openOperationForm(app, { id = null, preset = null } = {}) {
   function renderTransfer() {
     const accounts = (currentId) => [{ value: '', label: 'Compte courant' }, ...envelopeOptions(currentId)];
     if (!app.state.envelopes.length) {
-      body.appendChild(h('div.notice.warn', icon('alert'), h('div.grow', "Un virement interne déplace de l'argent entre le compte courant et une enveloppe. Crée d'abord une enveloppe (onglet Enveloppes).")));
+      body.appendChild(h('div.notice.warn', icon('alert'), h('div.grow', "Ce mouvement met de l'argent de côté dans une enveloppe, ou l'en retire. Crée d'abord une enveloppe (onglet Enveloppes).")));
     }
     fields.from = selectField({
       label: 'De',
@@ -588,6 +597,7 @@ export function openOperationForm(app, { id = null, preset = null } = {}) {
       options: accounts(existing?.from),
       onChange: (value) => {
         f.from = value;
+        sheet.setTitle(titleFor());
         touch();
       },
     });
@@ -598,6 +608,7 @@ export function openOperationForm(app, { id = null, preset = null } = {}) {
       options: accounts(existing?.to),
       onChange: (value) => {
         f.to = value;
+        sheet.setTitle(titleFor());
         touch();
       },
     });
@@ -605,10 +616,11 @@ export function openOperationForm(app, { id = null, preset = null } = {}) {
       'button.icon-btn',
       {
         type: 'button',
-        'aria-label': 'Inverser le sens du virement',
+        'aria-label': 'Inverser le sens',
         style: { alignSelf: 'flex-end', flex: 'none' },
         onclick: () => {
           [f.from, f.to] = [f.to, f.from];
+          sheet.setTitle(titleFor());
           touch();
           render();
         },
@@ -862,7 +874,7 @@ export function openOperationForm(app, { id = null, preset = null } = {}) {
         showErrors(plan.errors);
         return;
       }
-      if (await app.commit(plan.cs, { label: existing ? 'Virement modifié' : 'Virement enregistré' })) finish();
+      if (await app.commit(plan.cs, { label: existing ? 'Mouvement modifié' : moveDoneLabel(f.from, f.to) })) finish();
       return;
     }
 
@@ -918,7 +930,7 @@ export function openOperationForm(app, { id = null, preset = null } = {}) {
       app.fail(plan.errors[0].message);
       return;
     }
-    const label = existing.kind === KIND.TRANSFER ? 'Virement supprimé' : 'Opération supprimée';
+    const label = existing.kind === KIND.TRANSFER ? 'Mouvement supprimé' : 'Opération supprimée';
     if (await app.commit(plan.cs, { label })) finish();
   }
 

@@ -182,7 +182,7 @@ function validateRule(state, rule, existing) {
     else if (env.closed && existing?.[field] !== id) errors.push(err(field, `« ${env.name} » est clôturée.`, 'closed-envelope'));
   }
   if (rule.kind === KIND.OPERATION && rule.envelopeId && rule.amount > 0) {
-    errors.push(err('envelopeId', "Une enveloppe ne reçoit de l'argent que par virement : choisis le type « Virement ».", 'credit-in-envelope'));
+    errors.push(err('envelopeId', "Un revenu arrive toujours sur le compte courant : pour remplir une enveloppe chaque mois, choisis le type « Mise de côté ».", 'credit-in-envelope'));
   }
   return errors;
 }

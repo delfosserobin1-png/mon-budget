@@ -33,10 +33,10 @@ export function buildDemoState(today) {
   };
   const ctx = { today };
 
-  const tag = (id, name, color) => makeTag({ id: `tag_demo_${id}`, name, color });
+  const tag = (id, name, color, quota = null) => makeTag({ id: `tag_demo_${id}`, name, color, quota });
   state.tags = [
-    tag('courses', 'Courses', 'vert'),
-    tag('resto', 'Restaurant', 'ambre'),
+    tag('courses', 'Courses', 'vert', { amount: 40000, period: 'month' }),
+    tag('resto', 'Restaurant', 'ambre', { amount: 6000, period: 'week' }),
     tag('transport', 'Transport', 'bleu'),
     tag('loisirs', 'Loisirs', 'violet'),
     tag('sante', 'Santé', 'rose'),

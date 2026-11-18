@@ -53,22 +53,30 @@ Décrit entièrement dans `core/schema.js`. Chaque famille a un « maker » qui 
 
 | Collection | Contenu | Champs notables |
 | --- | --- | --- |
-| `operations` | dépenses, revenus, virements internes, ajustements | `kind`, `date`, `time`, `amount` (centimes, signé), `label`, `counterparty`, `comment`, `importance`, `tags`, `envelopeId`, `from` / `to` (virements), `simulated`, `checked`, `recurringId`, `photoIds`, `bank` (pointage relevé), `auto` |
+| `operations` | dépenses, revenus, mouvements d'enveloppe, ajustements | `kind`, `date`, `time`, `amount` (centimes, signé), `label`, `counterparty`, `comment`, `importance`, `tags`, `envelopeId`, `from` / `to` (virements), `simulated`, `checked`, `recurringId`, `photoIds`, `bank` (pointage relevé), `auto` |
 | `envelopes` | enveloppes | `name`, `color`, `goalAmount`, `goalDate`, `closed` |
-| `tags` | tags libres | `name`, `color` |
+| `tags` | tags libres | `name`, `color`, `quota` (`amount`, `period`, `from` / `to` si période libre) |
 | `recurring` | règles de récurrence | `frequency`, `interval`, `startDate`, `endDate`, `nextK`, `active` |
 | `reconciliations` | constats de solde | `date`, `realBalance`, `computedBalance`, `gap`, `statementId` |
 | `statements` | relevés importés | période, soldes, compteurs, `fingerprint`, `fileId` |
 | `rules` | habitudes par tiers | `key`, `label`, `tags`, `envelopeId`, `importance`, `uses` |
-| `bugReports` | signalements | texte, étapes, diagnostic, `photoIds` |
+| `bugReports` | commentaires pour Claude | `kind`, texte, étapes, diagnostic, `photoIds`, `origin` (formulaire ou bouton IA), `target` (élément visé) |
 | `files` | fiches des pièces jointes | `kind`, `mime`, `size` (le contenu est dans `blobs`) |
 
 Choix structurants :
 
 - **Centimes entiers** partout : `12,30 €` est `1230`. Aucun arrondi flottant possible.
 - **Dates en texte ISO** (`2026-11-15`), calculs en UTC : pas de décalage d'un jour selon l'heure d'été.
-- **Un virement interne** est une opération `kind: 'transfer'` avec `from` et `to` (`null` = compte
-  courant). Il ne change jamais le solde total.
+- **Un mouvement d'enveloppe** est une opération `kind: 'transfer'` avec `from` et `to` (`null` =
+  compte courant). Il ne change jamais le solde total. À l'écran il s'appelle Alimentation (depuis
+  le compte courant), Retrait (vers le compte courant) ou Déplacement (d'une enveloppe à l'autre) :
+  `moveLabel(from, to)` dans `core/operations.js`. Le mot « virement » est réservé aux vrais
+  virements bancaires, qui sont des dépenses ou des revenus.
+- **Un quota** (`core/quotas.js`) se calcule, il n'est jamais stocké : pour une période (`windowAt`,
+  semaine du lundi au dimanche), somme signée des opérations réelles du tag (un remboursement rend
+  de la marge ; une opération à plusieurs tags compte en entier dans chacun). Les prévisions sont
+  comptées à part (`planned`, `projected`). Niveaux : `ok`, `warn` dès 80 %, `over` au-delà.
+  `quotaImpact(state, op)` dit ce que changerait une saisie, sans rien modifier.
 - **Une prévision** est une opération `simulated: true`. Elle ne compte que dans l'écran Prévisions.
 - **Une échéance de récurrence** est la k-ième date depuis `startDate` : pas de dérive (« le 31 »
   reste le 31 quand le mois le permet). Les échéances des 180 prochains jours sont générées comme
@@ -168,6 +176,24 @@ anciennes imparfaites n'empêchent pas de travailler.
   l'en-tête `Authorization` ; les erreurs sont réécrites en français sans le citer.
 - Côté ordinateur, `tools/commentaires.mjs` réutilise `io/github.js` et `core/comments.js`.
 
+### Le bouton IA
+
+```
+ ui/annotate.js                      ui/capture.js                      même chemin que ci-dessus
+ onglet IA → calque de dessin   →    clone de l'écran → SVG → PNG   →   fiche bugReports
+ (entourer ou toucher)               (styles et polices recopiés,       origin: 'annotation'
+ pickElement → élément visé           montants masqués « ••• € »)       target: écran, chemin…
+```
+
+- `pickElement` sonde l'écran en une dizaine de points de la zone entourée (ou au point touché) et
+  garde l'élément le plus souvent rencontré, ou à défaut leur parent commun ; `selectorPath` en
+  donne le chemin, `describeTarget` le nom lisible (« bouton
+  « Alimenter » — écran « Enveloppes » »).
+- La capture n'utilise aucune bibliothèque : l'écran est cloné, ses styles et ses polices sont
+  recopiés dans une image SVG, que le navigateur dessine sur un `canvas`. Les éléments marqués
+  `data-capture="skip"` (le calque, l'onglet IA) en sont exclus, et les photos de tickets aussi.
+- L'élément visé voyage dans le marqueur (`target`) et en clair dans le corps (« Élément visé »).
+
 ## Interface
 
 - `ui/dom.js` : `h('div.classe', { attributs }, enfants…)` construit le DOM, texte toujours échappé.
@@ -194,6 +220,11 @@ anciennes imparfaites n'empêchent pas de travailler.
 - **Commentaires** : un faux GitHub en mémoire (`tests/fake-github.js`) sert aux tests unitaires
   (par `fetch`) et aux parcours (branché sur les demandes du navigateur). Envoi, coupure, doublon,
   jeton expiré, boîte publique, réponses, discussion ; et l'outil de Claude contre le même faux.
+- **Bouton IA** : un vrai tracé au doigt (souris simulée) sur l'écran, la capture produite est
+  relue (dimensions, montants masqués), l'élément visé arrive dans le faux GitHub.
+- **Quotas** : périodes et bornes (semaine à cheval sur deux années, février bissextile, dates
+  libres), remboursements, prévisions, avertissement à la saisie, jauges dans Tags et Stats,
+  passage par une sauvegarde.
 - **Dossier du téléphone** : la fenêtre « choisir un dossier » ne se pilote pas ; elle est remplacée
   par un dossier du stockage privé du navigateur, qui s'utilise de la même façon, ce qui permet de
   relire réellement les fichiers écrits.

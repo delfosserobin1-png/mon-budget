@@ -139,6 +139,34 @@ Choix faits en ton absence, à valider ou à changer :
 - **« Signaler un bug » devient « Commentaires pour Claude »** : mêmes fiches, plus le type (idée,
   question), l'écran concerné, l'envoi et le fil de discussion. Les anciens signalements restent lisibles.
 
+## Version 2.2.0 : bouton IA, quotas, vocabulaire
+
+Choix faits en ton absence, à valider ou à changer :
+
+- **« Virement » retiré du bouton +.** Tu as raison : pour toi, un virement est un vrai virement
+  bancaire (donc une dépense ou un revenu). Les déplacements d'argent vers ou depuis une enveloppe
+  existent toujours (sans eux, pas d'enveloppes), mais ils se font depuis la fiche de l'enveloppe
+  et s'appellent Alimentation, Retrait, Déplacement. J'ai gardé « Dépense » et « Revenu » : ce sont
+  les mots de toutes les applis de budget. Si tu préfères « Sortie / Entrée », c'est un changement
+  de quelques lignes.
+- **Un quota par tag**, avec une seule période (jour, semaine, mois, année ou deux dates). Plusieurs
+  quotas sur un même tag (par semaine ET par mois) compliqueraient l'écran pour un cas rare.
+- **La semaine va du lundi au dimanche.**
+- **Une dépense à plusieurs tags compte en entier dans chacun de leurs quotas** (et non au prorata,
+  comme dans les graphiques) : un quota « Restaurant » doit voir tout le repas.
+- **Un remboursement portant le même tag rend de la marge.**
+- **Un quota prévient, il ne bloque jamais** : à 80 % (orange), au-delà (rouge), et au moment de la
+  saisie.
+- **Bouton IA : montants masqués par défaut sur la capture.** Un interrupteur les montre quand c'est
+  utile (un total faux, par exemple). Les photos de tickets ne figurent jamais sur la capture.
+- **Bouton IA : un onglet fin sur le bord droit** plutôt qu'un rond flottant au milieu de l'écran :
+  dans les listes, il ne couvre que le « € » des montants (un test le vérifie). Il se déplace d'un
+  glissé, passe sur le bord gauche si on le préfère, et se masque dans les réglages.
+- **Les messages passagers** (« Enregistré », bouton « Annuler ») n'apparaissent pas sur la capture.
+- **Relève des commentaires 4 fois par jour** par une tâche programmée de l'appli Claude, visible et
+  modifiable dans l'appli. Lors d'une relève, Claude ne fait que ce qui est clair et sans risque ; il
+  répond par une question pour le reste.
+
 ## Reporté à plus tard
 
 | Sujet | Pourquoi pas maintenant |
@@ -147,7 +175,9 @@ Choix faits en ton absence, à valider ou à changer :
 | Empreinte digitale | demande un module natif de plus, à tester sur ton téléphone |
 | Plafonds et alertes par enveloppe ou par tag | simple à ajouter une fois l'usage réel observé |
 | Diagramme de flux (Sankey) | peu lisible sur un écran de téléphone ; à rediscuter |
-| Relève automatique des commentaires par Claude | à programmer une fois la publication en place |
+| Traitement immédiat des commentaires (Claude lancé automatiquement sur l'ordinateur) | refusé par le garde-fou de sécurité de Claude : à décider par toi |
+| Connexion directe à la banque | options et proposition dans `connexion-banque.md` |
+| Tableau de bord | proposition faite, en attente de ton choix |
 | Recevoir un relevé « partagé » depuis une autre appli (menu Partager du téléphone) | possible pour une appli installée ; à faire si l'import par le sélecteur de fichiers te paraît long |
 | Connexion par QR code au lieu de coller le jeton | confort ; à voir après le premier réglage réel |
 | Refonte visuelle d'après tes maquettes | j'attends tes maquettes ; l'habillage actuel est isolé dans `css/app.css` |

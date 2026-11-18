@@ -334,7 +334,7 @@ export function createReconcileScreen(app) {
     clear(computedLine);
     const day = date.value || app.today();
     computedLine.append(
-      h('span.k', `Solde total dans l'appli au ${formatDate(day)}`, infoButton('Solde comparé', "C'est le solde total (compte courant + enveloppes), calculé avec les opérations réelles à leur date de banque. Les prévisions et les virements internes n'y changent rien.")),
+      h('span.k', `Solde total dans l'appli au ${formatDate(day)}`, infoButton('Solde comparé', "C'est le solde total (compte courant + enveloppes), calculé avec les opérations réelles à leur date de banque. Les prévisions et les mouvements d'enveloppes n'y changent rien.")),
       h('span.v.num', { dataset: { value: 'computed' } }, formatAmount(bankBalanceAt(app.state, day))),
     );
   }

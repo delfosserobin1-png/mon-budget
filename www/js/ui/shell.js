@@ -17,7 +17,8 @@ export function createShell(app, { tabs, screens }) {
   const host = h('div.screen-host');
   const tabbar = h('nav.tabbar', { 'aria-label': 'Navigation principale' });
   const overlayRoot = h('div.overlay-root');
-  const toasts = h('div.toast-root', { 'aria-live': 'polite' });
+  // Messages passagers : jamais sur les captures du bouton IA (data-capture, voir ui/capture.js).
+  const toasts = h('div.toast-root', { 'aria-live': 'polite', 'data-capture': 'skip' });
   // Bandeau « nouvelle version » : au-dessus de tout écran, sans rien recouvrir.
   const updateBar = h('div.update-bar', { role: 'status', hidden: true });
   const main = h('div.frame-main', updateBar, host, tabbar);
@@ -174,6 +175,7 @@ export function createShell(app, { tabs, screens }) {
         type: 'button',
         'aria-label': `Annuler : ${label}`,
         title: label,
+        'data-capture': 'skip',
         onclick: async () => {
           hideUndo();
           await app.undo();

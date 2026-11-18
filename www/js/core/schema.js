@@ -102,11 +102,36 @@ export function makeEnvelope(input = {}) {
   };
 }
 
+/** Périodes d'un quota de tag (voir core/quotas.js). */
+export const QUOTA_PERIODS = Object.freeze([
+  { id: 'day', label: 'Jour', every: 'par jour', current: "aujourd'hui" },
+  { id: 'week', label: 'Semaine', every: 'par semaine', current: 'cette semaine' },
+  { id: 'month', label: 'Mois', every: 'par mois', current: 'ce mois-ci' },
+  { id: 'year', label: 'Année', every: 'par an', current: 'cette année' },
+  { id: 'custom', label: 'Dates', every: 'sur la période', current: 'sur la période' },
+]);
+
+/**
+ * Quota d'un tag : un plafond de dépenses (centimes) par jour, semaine, mois, année, ou entre deux
+ * dates (period 'custom', from ≤ to). Un quota incomplet ou incohérent est ignoré (null).
+ */
+function quotaOrNull(input) {
+  if (!input || typeof input !== 'object') return null;
+  const amount = int(input.amount, 0);
+  if (amount <= 0) return null;
+  const period = oneOf(input.period, QUOTA_PERIODS.map((p) => p.id), 'month');
+  if (period !== 'custom') return { amount, period, from: null, to: null };
+  const from = dateOr(input.from, null);
+  const to = dateOr(input.to, null);
+  return from && to && from <= to ? { amount, period, from, to } : null;
+}
+
 export function makeTag(input = {}) {
   return {
     id: str(input.id) || newId(PREFIX.tags),
     name: str(input.name).trim(),
     color: oneOf(input.color, COLORS, COLORS[0]),
+    quota: quotaOrNull(input.quota),
   };
 }
 
@@ -215,6 +240,25 @@ function remoteOrNull(input) {
  * version, où il ne s'agissait que de signalements de bugs : il est gardé pour que les anciennes
  * sauvegardes restent lisibles.
  */
+/**
+ * L'élément visé par un commentaire fait au bouton IA (zone entourée sur l'écran) : où il est,
+ * comment le retrouver dans le code (path), ce qu'il affiche (label, montants masqués), sa position.
+ */
+function targetOrNull(input) {
+  if (!input || typeof input !== 'object') return null;
+  const box = (r) => (r && typeof r === 'object' ? { x: int(r.x), y: int(r.y), w: Math.max(int(r.w), 0), h: Math.max(int(r.h), 0) } : null);
+  return {
+    screen: str(input.screen).slice(0, 40),
+    context: str(input.context).slice(0, 120),
+    path: str(input.path).slice(0, 400),
+    label: str(input.label).slice(0, 120),
+    role: str(input.role).slice(0, 40),
+    rect: box(input.rect),
+    area: box(input.area),
+    frame: input.frame && typeof input.frame === 'object' ? { w: Math.max(int(input.frame.w), 0), h: Math.max(int(input.frame.h), 0) } : null,
+  };
+}
+
 export function makeBugReport(input = {}) {
   const remote = remoteOrNull(input.remote);
   return {
@@ -232,6 +276,9 @@ export function makeBugReport(input = {}) {
     // Envoi demandé mais pas encore abouti (hors connexion…) : il sera retenté tout seul.
     queued: remote ? false : bool(input.queued),
     remote,
+    // 'annotation' : écrit avec le bouton IA, en entourant une zone de l'écran (voir ui/annotate.js)
+    origin: oneOf(input.origin, ['form', 'annotation'], 'form'),
+    target: targetOrNull(input.target),
     createdAt: str(input.createdAt) || nowISO(),
   };
 }

@@ -27,6 +27,39 @@ export function transferTitle(state, op) {
   return `${accountName(state, op.from)} → ${accountName(state, op.to)}`;
 }
 
+// Vocabulaire. Pour l'utilisateur, un « virement interne » n'existe pas : il alimente une enveloppe,
+// en retire de l'argent, ou déplace de l'argent d'une enveloppe à l'autre. (Le mot « virement » est
+// réservé aux vrais virements bancaires, qui sont des dépenses ou des revenus.)
+const MOVES = {
+  fund: { label: 'Alimentation', title: 'Alimenter une enveloppe', done: 'Enveloppe alimentée' },
+  withdraw: { label: 'Retrait', title: "Retirer d'une enveloppe", done: 'Retrait enregistré' },
+  move: { label: 'Déplacement', title: 'Déplacer entre enveloppes', done: 'Déplacement enregistré' },
+};
+
+/** Sorte de mouvement d'enveloppe : 'fund' (vers une enveloppe), 'withdraw' (vers le compte courant), 'move'. */
+export function moveKind(from, to) {
+  const source = from || null;
+  const target = to || null;
+  if (source === null) return 'fund';
+  if (target === null) return 'withdraw';
+  return 'move';
+}
+
+/** « Alimentation », « Retrait » ou « Déplacement » (accepte aussi '' pour le compte courant). */
+export function moveLabel(from, to) {
+  return MOVES[moveKind(from, to)].label;
+}
+
+/** Titre du formulaire : « Alimenter une enveloppe »… */
+export function moveTitle(from, to) {
+  return MOVES[moveKind(from, to)].title;
+}
+
+/** Message après enregistrement : « Enveloppe alimentée »… */
+export function moveDoneLabel(from, to) {
+  return MOVES[moveKind(from, to)].done;
+}
+
 /** Titre affiché d'une opération quelconque. */
 export function operationTitle(state, op) {
   if (op.kind === KIND.TRANSFER) return transferTitle(state, op);
@@ -67,7 +100,7 @@ export function planSaveOperation(state, input, { today }) {
       errors.push(
         err(
           'envelopeId',
-          `Une enveloppe ne reçoit de l'argent que par virement. Enregistre ce revenu sur le compte courant, puis vire-le vers « ${env.name} ».`,
+          `Un revenu arrive toujours sur le compte courant. Enregistre-le là, puis alimente « ${env.name} » depuis sa fiche.`,
           'credit-in-envelope',
           { envelopeId },
         ),

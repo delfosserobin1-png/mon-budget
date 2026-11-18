@@ -8,10 +8,11 @@ import { computeBalances } from '../core/balances.js';
 import { accountName, operationTitle } from '../core/operations.js';
 import { nextOccurrence } from '../core/recurring.js';
 import { sortNewestFirst, typeOf } from '../core/filters.js';
+import { quotaStatus, quotaText } from '../core/quotas.js';
 import { buildCsv, buildXlsx } from './xlsx.js';
 
 const yesNo = (v) => (v ? 'oui' : 'non');
-const TYPE_LABEL = { expense: 'Dépense', income: 'Revenu', transfer: 'Virement interne', adjustment: 'Ajustement' };
+const TYPE_LABEL = { expense: 'Dépense', income: 'Revenu', transfer: "Mouvement d'enveloppe", adjustment: 'Ajustement' };
 
 function operationsSheet(state, operations) {
   const tags = new Map(state.tags.map((t) => [t.id, t.name]));
@@ -88,11 +89,14 @@ export function sheetsFor(state, { today }) {
       { header: 'Couleur', width: 12 },
       { header: "Nombre d'opérations", type: 'int', width: 20 },
       { header: 'Total dépensé', type: 'money', width: 16 },
+      { header: 'Quota', width: 30 },
+      { header: 'Dépensé sur la période du quota', type: 'money', width: 18 },
     ],
     rows: state.tags.map((t) => {
       const ops = state.operations.filter((op) => !op.simulated && op.date <= today && op.tags.includes(t.id));
       const spent = ops.reduce((sum, op) => sum + (op.amount < 0 ? -op.amount : 0), 0);
-      return [t.name, t.color, ops.length, toEuros(spent)];
+      const status = t.quota ? quotaStatus(state, t, today) : null;
+      return [t.name, t.color, ops.length, toEuros(spent), t.quota ? quotaText(t.quota) : '', status ? toEuros(status.spent) : ''];
     }),
   });
 
@@ -112,7 +116,7 @@ export function sheetsFor(state, { today }) {
     ],
     rows: state.recurring.map((r) => [
       r.label,
-      r.kind === KIND.TRANSFER ? 'Virement interne' : r.amount < 0 ? 'Dépense' : 'Revenu',
+      r.kind === KIND.TRANSFER ? 'Mise de côté' : r.amount < 0 ? 'Dépense' : 'Revenu',
       toEuros(r.amount),
       frequencyLabel(r.frequency, r.interval),
       r.startDate,

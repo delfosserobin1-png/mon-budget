@@ -175,6 +175,22 @@ Code en modules indépendants, logique séparée de l'affichage, voir `architect
 « Fait » veut dire ici : écrit, et vérifié par des tests automatiques sur l'ordinateur. Le
 comportement sur ton téléphone reste à constater (`installer-sur-le-telephone.md`).
 
+## 16. Demandes de la version 2.2.0
+
+| Demande | État | Remarque |
+| --- | --- | --- |
+| Traiter les commentaires 4 fois par jour (3 h 30, 9 h, 15 h, 21 h 30) | Fait | tâche programmée de l'appli Claude ; ordinateur allumé et appli Claude ouverte |
+| Bouton IA : sélectionner ou entourer un endroit, écrire un commentaire, l'envoyer à Claude | Fait | onglet IA sur tous les écrans ; capture annotée, montants masqués ; élément visé transmis |
+| Correction immédiate dès l'envoi, ordinateur allumé en permanence comme serveur | Pas fait | refusé par le garde-fou de sécurité de Claude : à décider par toi (`connexion-claude.md`) |
+| « Virement » inutile à côté de Dépense / Revenu | Fait | retiré du bouton + ; mouvements d'enveloppe renommés Alimentation, Retrait, Déplacement |
+| Meilleurs termes que Dépense / Revenu ? | Proposé | gardés (standard des applis de budget) ; « Sortie / Entrée » possible sur demande |
+| Quotas par tag (jour, semaine, mois, durée libre) | Fait | aussi par année ; jauges, avertissement à la saisie, colonne dans l'export Excel |
+| Connexion directe à la banque | Étudié | options et proposition dans `connexion-banque.md` ; demande ton accord et ton compte |
+| Tableau de bord ? | Proposé | en attente de ton choix |
+| Améliorer le rendu visuel | Fait | grand solde, cartes en relief, titres, transitions, poignée des panneaux |
+| Code structuré, tous les tests nécessaires | Fait | 192 tests du moteur, 62 parcours dans un vrai navigateur |
+
 ## Hors périmètre
 
-Connexion bancaire automatique : écartée, comme convenu.
+Connexion bancaire automatique : écartée au départ ; étudiée en 2.2.0 (`connexion-banque.md`),
+en attente de ta décision.

@@ -20,7 +20,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createGithubClient, GithubError } from '../www/js/io/github.js';
-import { cleanMessage, kindLabel, parseMarker, parseRepo, screenLabel, threadFromRemote } from '../www/js/core/comments.js';
+import { cleanMessage, kindLabel, parseMarker, parseRepo, screenLabel, targetText, threadFromRemote } from '../www/js/core/comments.js';
 
 export const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 export const CONFIG_FILE = 'mon-budget.config.json';
@@ -66,7 +66,16 @@ export function splitBody(body) {
   });
   const lines = cleanMessage(rest).split('\n');
   if (/^\*\*.+\*\* — écran « /.test(lines[0] || '')) lines.shift();
-  return { text: lines.join('\n').trim(), diagnostics };
+  // l'élément visé (bouton IA) est rendu à part, à partir du marqueur
+  const kept = [];
+  for (let i = 0; i < lines.length; i++) {
+    if (/^\*\*Élément visé\*\* : /.test(lines[i])) {
+      if (lines[i + 1] === '' && /^`.*`$/.test(lines[i + 2] || '')) i += 2;
+      continue;
+    }
+    kept.push(lines[i]);
+  }
+  return { text: kept.join('\n').replace(/\n{3,}/g, '\n\n').trim(), diagnostics };
 }
 
 /** Met une issue et ses messages sous une forme simple à lire et à traiter. */
@@ -90,6 +99,8 @@ export function describe(issue, comments = []) {
     screenLabel: marker ? screenLabel(marker.screen) : '',
     version: marker ? marker.version : '',
     captures: marker && Array.isArray(marker.captures) ? marker.captures : [],
+    // commentaire fait au bouton IA : l'élément entouré (écran, chemin dans le code, libellé, position)
+    target: marker && marker.target && typeof marker.target === 'object' ? marker.target : null,
     text,
     diagnostics,
     thread,
@@ -105,6 +116,10 @@ function render(item, files = []) {
   head.push(day(item.createdAt));
   if (item.state === 'closed') head.push('traité');
   const lines = [`── ${head.join(' · ')} ──`, item.text || item.title];
+  if (item.target) {
+    lines.push('', `Élément visé : ${targetText(item.target)}`);
+    if (item.target.path) lines.push(`  ${item.target.path}`);
+  }
   if (files.length) lines.push('', `Captures : ${files.join(', ')}`);
   if (item.thread.length) {
     lines.push('', 'Fil :');

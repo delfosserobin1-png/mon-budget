@@ -6,7 +6,7 @@ import { KIND } from '../../www/js/core/schema.js';
 import { computeBalances, envelopeLowPoint, deltaFor, projectAvailable } from '../../www/js/core/balances.js';
 import {
   planSaveOperation, topupChangeset, planCreditThenTransfer, planSaveTransfer, planDeleteOperations,
-  planSetChecked, planConfirmSimulation, planAddTag, operationTitle,
+  planSetChecked, planConfirmSimulation, planAddTag, operationTitle, moveKind, moveLabel, moveTitle, moveDoneLabel,
 } from '../../www/js/core/operations.js';
 import { planSaveEnvelope, planCloseEnvelope, planReopenEnvelope, planDeleteEnvelope, envelopeReport, envelopeUsage } from '../../www/js/core/envelopes.js';
 import { planSaveTag, planDeleteTag, tagUsage } from '../../www/js/core/tags.js';
@@ -328,4 +328,12 @@ test("simulation confirmée en avance : elle prend la date d'aujourd'hui ; en re
   assert.equal(plan.op.checked, true);
   state = commit(state, plan);
   assert.equal(balances(state).available, 178000);
+});
+
+test('vocabulaire : un mouvement d’enveloppe est une alimentation, un retrait ou un déplacement (jamais un « virement »)', () => {
+  assert.deepEqual([moveKind(null, 'env_a'), moveKind('', 'env_a'), moveKind('env_a', null), moveKind('env_a', ''), moveKind('env_a', 'env_b')], ['fund', 'fund', 'withdraw', 'withdraw', 'move']);
+  assert.deepEqual([moveLabel('', 'env_a'), moveLabel('env_a', ''), moveLabel('env_a', 'env_b')], ['Alimentation', 'Retrait', 'Déplacement']);
+  assert.deepEqual([moveTitle('', 'env_a'), moveTitle('env_a', ''), moveTitle('env_a', 'env_b')], ['Alimenter une enveloppe', "Retirer d'une enveloppe", 'Déplacer entre enveloppes']);
+  assert.equal(moveDoneLabel('', 'env_a'), 'Enveloppe alimentée');
+  for (const text of [moveLabel('', 'x'), moveTitle('x', ''), moveDoneLabel('x', 'y')]) assert.ok(!/virement/i.test(text));
 });

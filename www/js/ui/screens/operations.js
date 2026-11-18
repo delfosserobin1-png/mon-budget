@@ -1,7 +1,7 @@
 // Écran « Opérations » : les soldes, la recherche, les filtres et la liste (le plus récent en haut,
 // le plus ancien en bas), avec sélection multiple.
 
-import { h, clear, amount, plural, debounce } from '../dom.js';
+import { h, clear, amount, bigAmount, plural, debounce } from '../dom.js';
 import { icon } from '../icons.js';
 import { infoButton, confirmDialog, chooseDialog } from '../overlays.js';
 import { operationList } from '../oprow.js';
@@ -165,7 +165,7 @@ export function createOperationsScreen(app) {
     const b = computeBalances(app.state, { upTo: today });
     clear(balancesEl);
     balancesEl.appendChild(h('div.label', 'Compte courant', infoButton(HELP.available.title, HELP.available.text)));
-    balancesEl.appendChild(h('div', { class: b.available < 0 ? 'balance-main num alert' : 'balance-main num', dataset: { value: 'available' } }, formatAmount(b.available)));
+    balancesEl.appendChild(h('div', { class: b.available < 0 ? 'balance-main num alert' : 'balance-main num', dataset: { value: 'available' } }, bigAmount(b.available)));
     const second = h('div.second');
     second.appendChild(h('span', 'Solde total ', h('span.amt', { dataset: { value: 'total' } }, formatAmount(b.total)), infoButton(HELP.total.title, HELP.total.text)));
     if (app.state.envelopes.length) {

@@ -4,7 +4,7 @@
 
 ## Où on en est
 
-L'appli est en version 2.1.0. Elle n'a plus besoin d'un APK : elle s'installe sur le téléphone
+L'appli est en version 2.2.0. Elle n'a plus besoin d'un APK : elle s'installe sur le téléphone
 depuis une adresse internet, comme une appli normale (icône, plein écran, sans connexion), se met à
 jour toute seule, et tu peux écrire à Claude depuis l'appli.
 

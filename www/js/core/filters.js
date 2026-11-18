@@ -5,6 +5,7 @@ import { addMonths, endOfMonth, formatDate, startOfMonth } from './dates.js';
 import { formatForInput } from './money.js';
 import { matchesQuery } from './text.js';
 import { deltaFor, touchesAvailable, touchesEnvelope } from './balances.js';
+import { moveLabel } from './operations.js';
 
 export const PERIODS = Object.freeze([
   { id: 'all', label: 'Tout' },
@@ -18,7 +19,7 @@ export const PERIODS = Object.freeze([
 export const TYPES = Object.freeze([
   { id: 'expense', label: 'Dépenses' },
   { id: 'income', label: 'Revenus' },
-  { id: 'transfer', label: 'Virements internes' },
+  { id: 'transfer', label: "Mouvements d'enveloppes" },
   { id: 'adjustment', label: 'Ajustements' },
 ]);
 
@@ -92,7 +93,8 @@ function haystack(state, op, names) {
   for (const id of op.tags) partsList.push(names.tags.get(id) || '');
   if (op.envelopeId) partsList.push(names.envelopes.get(op.envelopeId) || '');
   if (op.kind === KIND.TRANSFER) {
-    partsList.push('virement', names.envelopes.get(op.from) || 'compte courant', names.envelopes.get(op.to) || 'compte courant');
+    // on retrouve un mouvement d'enveloppe par son nom actuel comme par l'ancien (« virement »)
+    partsList.push('virement', 'mouvement', moveLabel(op.from, op.to), names.envelopes.get(op.from) || 'compte courant', names.envelopes.get(op.to) || 'compte courant');
   }
   if (op.importance) partsList.push(importanceLabel(op.importance));
   if (op.bank) partsList.push(op.bank.label, ...op.bank.details);

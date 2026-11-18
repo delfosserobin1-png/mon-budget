@@ -81,8 +81,12 @@ téléphone. Ces points-ci dépendent du téléphone lui-même et n'ont pas pu l
    onglet.
 7. **Thème sombre** du téléphone et **grande taille de police** : rien ne déborde.
 8. **Raccourci** : appui long sur l'icône, « Nouvelle opération ».
+9. **Bouton IA** (version 2.2.0) : l'onglet se touche facilement du pouce et se déplace d'un
+   glissé ; entourer au doigt fonctionne sans faire défiler l'écran ; la capture qui s'affiche
+   ressemble bien à l'écran (polices, couleurs, montants masqués) ; l'envoi arrive chez Claude.
 
-Si quelque chose cloche, écris-le dans l'appli : Plus › Commentaires pour Claude.
+Si quelque chose cloche, écris-le dans l'appli : Plus › Commentaires pour Claude (ou avec le bouton
+IA, directement sur l'endroit concerné).
 
 ## Et l'APK ?
 

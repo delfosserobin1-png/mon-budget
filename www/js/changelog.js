@@ -7,6 +7,18 @@
 
 export const CHANGES = [
   {
+    version: '2.2.0',
+    date: '2026-11-18',
+    title: 'Bouton IA et quotas par tag',
+    items: [
+      "Bouton IA au bord de l'écran : entoure ce qui te gêne, écris un mot, et Claude reçoit ton commentaire avec la capture (montants masqués).",
+      'Quotas par tag : un plafond par jour, semaine, mois ou entre deux dates, avec une jauge et un avertissement quand tu saisis une dépense.',
+      "Le bouton + ne propose plus que Dépense et Revenu. Les mouvements d'enveloppe s'appellent Alimentation, Retrait et Déplacement.",
+      'Claude relève tes commentaires 4 fois par jour.',
+      'Quelques retouches visuelles : grand solde plus lisible, cartes en léger relief, transitions plus douces.',
+    ],
+  },
+  {
     version: '2.1.0',
     date: '2026-11-16',
     title: "L'appli s'installe, se met à jour seule et parle à Claude",

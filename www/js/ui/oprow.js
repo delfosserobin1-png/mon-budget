@@ -3,7 +3,7 @@
 import { h, amount } from './dom.js';
 import { icon } from './icons.js';
 import { KIND } from '../core/schema.js';
-import { accountName, operationTitle, transferTitle } from '../core/operations.js';
+import { accountName, moveLabel, operationTitle, transferTitle } from '../core/operations.js';
 import { availableDelta, envelopeDelta } from '../core/balances.js';
 import { formatMonthKey, monthKey, weekdayName } from '../core/dates.js';
 
@@ -49,7 +49,7 @@ export function operationRow(app, op, options) {
   if (op.kind === KIND.TRANSFER) {
     meta.push(icon('transfer', 'sm'));
     if (op.label || perspective !== null) meta.push(h('span.text', transferTitle(state, op)));
-    else meta.push(h('span.text', 'Virement interne'));
+    else meta.push(h('span.text', moveLabel(op.from, op.to)));
   } else {
     if (op.envelopeId && perspective === null) {
       const env = state.envelopes.find((e) => e.id === op.envelopeId);
