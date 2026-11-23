@@ -53,6 +53,26 @@ export function overlayCount() {
   return stack.length;
 }
 
+/**
+ * Place le curseur à l'ouverture d'un panneau, à l'image suivante (le contenu est alors construit).
+ * Jamais si l'on a déjà commencé à remplir un champ de ce panneau entre-temps : sur un appareil lent
+ * (ou sous un automate de test), le texte en cours de frappe partirait dans un autre champ.
+ * pick() désigne le champ à cet instant-là.
+ */
+function focusOnOpen(container, pick, { select = false } = {}) {
+  requestAnimationFrame(() => {
+    if (!container.isConnected || container.contains(document.activeElement)) return;
+    const target = pick();
+    if (!target) return;
+    try {
+      target.focus({ preventScroll: true });
+      if (select && typeof target.select === 'function') target.select();
+    } catch {
+      /* sans importance */
+    }
+  });
+}
+
 /** Ferme ce qui est au premier plan (bouton retour). Renvoie true s'il y avait quelque chose. */
 export function closeTopOverlay() {
   const top = stack[stack.length - 1];
@@ -115,14 +135,7 @@ export function openSheet({ title = '', body = null, foot = null, full = false, 
     },
   };
   register(entry);
-  requestAnimationFrame(() => {
-    const auto = sheet.querySelector('[data-autofocus]');
-    try {
-      (auto || closeBtn).focus({ preventScroll: true });
-    } catch {
-      /* sans importance */
-    }
-  });
+  focusOnOpen(sheet, () => sheet.querySelector('[data-autofocus]') || closeBtn);
   return {
     el: sheet,
     body: bodyEl,
@@ -175,14 +188,7 @@ function openDialog({ title, message, content = null, buttons, dismissValue = nu
     const el = h('div.overlay.centered', h('div.scrim', { onclick: () => finish(dismissValue) }), dialog);
     const entry = { el, requestClose: () => finish(dismissValue), forceClose: () => finish(dismissValue) };
     register(entry);
-    requestAnimationFrame(() => {
-      const auto = dialog.querySelector('[data-autofocus]');
-      try {
-        if (auto) auto.focus({ preventScroll: true });
-      } catch {
-        /* sans importance */
-      }
-    });
+    focusOnOpen(dialog, () => dialog.querySelector('[data-autofocus]'));
   });
 }
 
@@ -269,14 +275,7 @@ export function promptDialog({ title, message = '', label = '', value = '', plac
     const el = h('div.overlay.centered', h('div.scrim', { onclick: () => finish(null) }), dialog);
     const entry = { el, requestClose: () => finish(null), forceClose: () => finish(null) };
     register(entry);
-    requestAnimationFrame(() => {
-      try {
-        input.focus({ preventScroll: true });
-        input.select();
-      } catch {
-        /* sans importance */
-      }
-    });
+    focusOnOpen(dialog, () => input, { select: true });
   });
 }
 

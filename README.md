@@ -55,7 +55,7 @@ Version 2.3.0, en ligne : **https://delfosserobin1-png.github.io/mon-budget/**
 
 ```
 www/            l'appli (c'est ce dossier qui est publié, et embarqué dans l'APK)
-tests/          209 tests du moteur + 69 parcours dans un vrai navigateur
+tests/          209 tests du moteur + 70 parcours dans un vrai navigateur
 tools/          serveur local, liste des fichiers hors connexion, publication, lecture des
                 commentaires, fichier unique, APK
 docs/           installation, connexion à Claude, publication, architecture, décisions, cahier des

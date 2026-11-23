@@ -305,6 +305,9 @@ et grande police). Si un module Capacitor change d'interface, tout est isolé da
 - Pendant `npm test`, l'avertissement « Cannot load "@napi-rs/canvas" » vient de pdf.js lancé hors
   navigateur : il est sans conséquence (la lecture du texte n'utilise pas le dessin).
 - Les parcours e2e chargent `www/` en direct : ne modifie pas `www/` pendant qu'ils tournent.
+- Un test qui passe ici et échoue chez GitHub (machines plus lentes) cache souvent une course :
+  libellés perdus en 2.2.0 et 2.3.0 = le curseur posé à l'ouverture d'un panneau arrivait en pleine
+  frappe (corrigé : `focusOnOpen` dans `ui/overlays.js` ne vole jamais un champ déjà commencé).
 - Les serveurs de GitHub sont à l'heure universelle : `tests/e2e/harness.js` règle le processus sur
   Paris (`process.env.TZ`), et le workflow aussi. Pour reproduire un échec vu chez GitHub :
   `$env:TZ='UTC'` puis les tests.

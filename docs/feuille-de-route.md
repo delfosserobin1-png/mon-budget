@@ -114,7 +114,7 @@ Avant d'ouvrir l'appli à d'autres :
 
 ## 6. Sécurité, robustesse, tests, évolutivité : ce qui existe, ce qu'il faudra
 
-**Déjà en place** : 209 tests du moteur et 69 parcours dans un vrai navigateur à chaque publication ;
+**Déjà en place** : 209 tests du moteur et 70 parcours dans un vrai navigateur à chaque publication ;
 montants en centimes entiers ; toute action annulable ; migration de données testée ; fonctionnement
 sans connexion ; mises à jour vérifiées fichier par fichier ; jeton et phrase secrète jamais exportés ;
 relevé bancaire chiffré ; publication bloquée si un test échoue (ici, puis chez GitHub).

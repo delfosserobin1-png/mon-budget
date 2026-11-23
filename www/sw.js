@@ -17,7 +17,7 @@
 
 /* GENERE:DEBUT */
 const VERSION = "2.3.0";
-const BUILD = "585301acec9ccf09";
+const BUILD = "c1024f13c6da94e3";
 const FILES = [
   ["banque-retour.html", "7623cac615c829018dcd07cdb86401f3deee38775bf150602e7e3561a942c665"],
   ["css/app.css", "1317c20d9c2fa729f41cce9327dbe657da105f270df51e1be080019019578b21"],
@@ -90,7 +90,7 @@ const FILES = [
   ["js/ui/forms/tag.js", "2b129ebcf8214e92e3d9d1977b1d7906f9eb3ef76045fb1c20e9842a25ff336a"],
   ["js/ui/icons.js", "3997a15371d4f913133d5860f59c8c89e89645798a75b6102d6ff947d7aba7c5"],
   ["js/ui/oprow.js", "0c5eca99ed8041825c7d5405f10e31a9ec7ec3b42bb63488c3fdda27ce6b0737"],
-  ["js/ui/overlays.js", "e194b76fc6cac71357f5eb1e40eb1ade0627051309293399b28015029e80995f"],
+  ["js/ui/overlays.js", "a1d018cb0052132fe2a435440f73d679ecc687101f554c79507fb6d3139eaf9d"],
   ["js/ui/photos.js", "7a653630d71ba0cd8b9c37e9c2b0190bc740145c0966438349b9f75dae9e67cb"],
   ["js/ui/pwa-ui.js", "414ff7acf9d76e5217342f29eb09b3cf4323a8d7d1fdb86a5ec357ecad9a6550"],
   ["js/ui/quotas-ui.js", "ee5a414e7e2447991410785f856bfbddc28229b6d30405c548029950819d031f"],

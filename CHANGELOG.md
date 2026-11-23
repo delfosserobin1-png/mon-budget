@@ -25,6 +25,14 @@
   exports Excel, mode d'emploi).
 - Les compléments d'enveloppe disent « ajouter depuis le compte courant » au lieu de « virer ».
 
+### Corrigé
+
+- À l'ouverture d'un formulaire, le curseur posé sur le Montant « à l'image suivante » pouvait
+  arriver en retard (appareil lent) et arracher le curseur au libellé déjà en cours de frappe : le
+  texte partait dans le Montant et le libellé restait vide. Le curseur ne quitte plus jamais un champ
+  déjà commencé (panneaux, boîtes de dialogue). C'était la vraie cause des libellés perdus vus chez
+  GitHub le 18-11 (et non la liste de suggestions).
+
 ### À décider
 
 - **Relève programmée des commentaires** : les tâches créées le 18-11 s'arrêtaient toutes à leur
@@ -43,7 +51,7 @@
 - `docs/feuille-de-route.md` : plusieurs comptes, partage, comptes utilisateurs, RGPD, CGU, étapes
   d'une publication officielle.
 - 209 tests du moteur (17 nouveaux, dont un faux Enable Banking qui vérifie la signature du jeton) et
-  69 parcours dans un vrai navigateur (7 nouveaux).
+  70 parcours dans un vrai navigateur (8 nouveaux).
 
 ## 2.2.0 — novembre 2026
 
