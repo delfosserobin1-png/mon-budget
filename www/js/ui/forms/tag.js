@@ -1,4 +1,4 @@
-// Création / modification d'un tag : nom, couleur, et quota (plafond de dépenses par période).
+// Création / modification d'un tag : nom, couleur, et quota (plafond de sorties par période).
 
 import { h } from '../dom.js';
 import { openSheet, promptDialog } from '../overlays.js';
@@ -64,9 +64,9 @@ function quotaEditor(app, existing) {
     },
   });
   dates.hidden = period !== 'custom';
-  const details = h('div.stack', { dataset: { block: 'quota' } }, amount.el, fieldGroup('Par', periods.el), dates, h('p.hint', "Les dépenses qui portent ce tag s'additionnent sur la période (un remboursement rend de la marge). L'appli te prévient dès 80 %, et au moment de saisir une dépense qui ferait dépasser."));
+  const details = h('div.stack', { dataset: { block: 'quota' } }, amount.el, fieldGroup('Par', periods.el), dates, h('p.hint', "Les sorties qui portent ce tag s'additionnent sur la période (une entrée avec ce tag, comme un remboursement, rend de la marge). L'appli te prévient dès 80 %, et au moment de saisir une sortie qui ferait dépasser."));
   const enabled = toggle({
-    label: 'Limiter les dépenses de ce tag',
+    label: 'Limiter les sorties de ce tag',
     hint: 'Un quota par jour, semaine, mois, année, ou entre deux dates.',
     checked: !!quota,
     name: 'quota',

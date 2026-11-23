@@ -4,7 +4,7 @@
 
 import { isValidISO, makeISO, parseFrenchDate } from '../../core/dates.js';
 import { normalize } from '../../core/text.js';
-import { interpretLine } from './labels.js';
+import { cleanName, interpretLine } from './labels.js';
 import { StatementError } from './pdf-table.js';
 
 /** Décode un fichier texte : UTF-8, sinon l'encodage Windows des vieux exports bancaires. */
@@ -143,6 +143,84 @@ export function parseOfx(text) {
     statement.openingDate = null;
     statement.checks.balance = 'absent';
   }
+  return statement;
+}
+
+// ---------------------------------------------------------------------------------------------
+// Relevé de la connexion bancaire (tools/banque.mjs) : déjà structuré, en JSON
+// ---------------------------------------------------------------------------------------------
+//
+// { format: 'mon-budget-banque', version: 1, bank, account: { last4, name },
+//   fetchedAt, validUntil, periodStart, periodEnd, balance: { amount, date, type } | null,
+//   lines: [{ date, valueDate, opDate, amount (centimes, signé), label, details: [], counterparty }] }
+
+export const BANK_FORMAT = 'mon-budget-banque';
+
+export function looksLikeBankJson(text) {
+  return new RegExp(`"format"\\s*:\\s*"${BANK_FORMAT}"`).test(String(text).slice(0, 600));
+}
+
+export function parseBankJson(text) {
+  let data;
+  try {
+    data = JSON.parse(text);
+  } catch {
+    throw new StatementError("Le relevé de la banque est abîmé : il n'a pas pu être lu.", 'format');
+  }
+  if (!data || data.format !== BANK_FORMAT || data.version !== 1 || !Array.isArray(data.lines)) {
+    throw new StatementError("Ce fichier n'est pas un relevé de la banque connectée.", 'format');
+  }
+  const warnings = [];
+  const rawLines = [];
+  let ignored = 0;
+  for (const raw of data.lines) {
+    const date = raw && isValidISO(raw.date) ? raw.date : null;
+    const amount = raw && Number.isInteger(raw.amount) && raw.amount !== 0 ? raw.amount : null;
+    if (!date || amount === null) {
+      ignored++;
+      continue;
+    }
+    rawLines.push({
+      date,
+      valueDate: isValidISO(raw.valueDate) ? raw.valueDate : null,
+      amount,
+      label: String(raw.label || '').replace(/\s+/g, ' ').trim() || 'Opération',
+      details: Array.isArray(raw.details) ? raw.details.map((d) => String(d)).filter(Boolean).slice(0, 6) : [],
+      page: 1,
+      apiOpDate: isValidISO(raw.opDate) ? raw.opDate : null,
+      apiCounterparty: String(raw.counterparty || '').trim(),
+    });
+  }
+  if (ignored) warnings.push(`${ignored} opération${ignored > 1 ? 's illisibles ont été ignorées' : ' illisible a été ignorée'}.`);
+  const account = data.account && data.account.last4 ? String(data.account.last4) : '';
+  const extra = { warnings, account };
+  if (isValidISO(data.periodStart) && isValidISO(data.periodEnd) && data.periodStart <= data.periodEnd) {
+    extra.periodStart = data.periodStart;
+    extra.periodEnd = data.periodEnd;
+  }
+  const balance = data.balance && Number.isInteger(data.balance.amount) && isValidISO(data.balance.date) ? data.balance : null;
+  if (balance) {
+    extra.closingBalance = balance.amount;
+    extra.closingDate = balance.date;
+  }
+  const statement = finish('api', String(data.bank || ''), rawLines, extra);
+  // La banque donne parfois mieux que le libellé : le nom du bénéficiaire, la date de l'achat.
+  statement.lines = statement.lines.map(({ apiOpDate, apiCounterparty, ...line }) => {
+    const out = { ...line };
+    if (!out.counterparty && apiCounterparty) out.counterparty = cleanName(apiCounterparty);
+    if (!out.opDate && apiOpDate && apiOpDate !== out.date && apiOpDate <= out.date) out.opDate = apiOpDate;
+    return out;
+  });
+  if (account) statement.accountLabel = `${data.bank ? `${data.bank}, compte` : 'Compte'} se terminant par ${account}`;
+  // Le solde est celui du jour du relevé : on en déduit le solde de départ (comme pour un OFX).
+  if (statement.closingBalance != null && statement.closingDate && statement.closingDate >= statement.periodEnd) {
+    statement.openingBalance = statement.closingBalance - statement.totalCredit + statement.totalDebit;
+    statement.openingDate = null;
+  } else {
+    statement.closingBalance = null;
+    statement.closingDate = null;
+  }
+  statement.bankFetch = { fetchedAt: String(data.fetchedAt || ''), validUntil: isValidISO(String(data.validUntil || '').slice(0, 10)) ? String(data.validUntil).slice(0, 10) : null };
   return statement;
 }
 

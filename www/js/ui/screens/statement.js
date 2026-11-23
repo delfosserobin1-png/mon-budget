@@ -50,7 +50,7 @@ function base64ToBytes(text) {
   return bytes;
 }
 
-export function createStatementScreen(app) {
+export function createStatementScreen(app, params = {}) {
   let w = blank();
   const saved = app.setting(DRAFT_KEY);
   if (saved && saved.statement && Array.isArray(saved.statement.lines)) w = { ...blank(), ...saved };
@@ -854,7 +854,7 @@ export function createStatementScreen(app) {
     for (const topup of s.topups) {
       const env = app.state.envelopes.find((e) => e.id === topup.envelopeId);
       content.appendChild(
-        h('div.notice.warn', icon('envelope'), h('div.grow', `L'enveloppe « ${env ? env.name : '?'} » n'a pas assez pour ces dépenses : ${formatAmount(topup.amount)} seront virés du compte courant pour qu'elle ne passe pas en négatif.`)),
+        h('div.notice.warn', icon('envelope'), h('div.grow', `L'enveloppe « ${env ? env.name : '?'} » n'a pas assez pour ces sorties : ${formatAmount(topup.amount)} y seront ajoutés depuis le compte courant pour qu'elle ne passe pas en négatif.`)),
       );
     }
 
@@ -1015,6 +1015,24 @@ export function createStatementScreen(app) {
     else if (w.step === 'extras') renderExtras(m);
     else renderSummary(m);
     scroll.scrollTop = keep;
+  }
+
+  // Relevé apporté par un autre écran (la banque connectée) : on le lit tout de suite, après accord
+  // si un import était déjà en cours.
+  if (params.incoming) {
+    const incoming = params.incoming;
+    queueMicrotask(async () => {
+      if (w.statement && w.step !== 'pick' && w.step !== 'done') {
+        const ok = await confirmDialog({
+          title: 'Un import est déjà en cours',
+          message: `Tu avais commencé à importer un relevé (${periodText(w.statement)}). Le remplacer par les opérations de la banque ?`,
+          confirmLabel: 'Remplacer',
+          cancelLabel: 'Garder le relevé en cours',
+        });
+        if (!ok) return;
+      }
+      await readFile(incoming);
+    });
   }
 
   return {

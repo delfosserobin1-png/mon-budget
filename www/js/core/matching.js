@@ -18,6 +18,7 @@ import { wordOverlap } from './text.js';
 import { computeBalances, findEnvelopeShortfalls } from './balances.js';
 import { bankBalanceAt, openingOperation } from './reconciliation.js';
 import { learnInto, suggestFor } from './rules.js';
+import { catalogueTag } from './categories.js';
 
 /** Tolérance sur la date (en jours) pour reconnaître une même opération. */
 export const MATCH_WINDOW_DAYS = 4;
@@ -135,14 +136,18 @@ export function matchStatement(state, statement, { window = MATCH_WINDOW_DAYS } 
   return { matches, already: [...already], missing, extra };
 }
 
-/** Champs proposés pour créer l'opération d'une ligne manquante. */
+/**
+ * Champs proposés pour créer l'opération d'une ligne manquante : d'abord ce que l'appli a appris
+ * (règles, historique du tiers), sinon le catalogue des commerçants courants (categories.js).
+ */
 export function proposeForLine(state, line) {
   const hint = suggestFor(state, { counterparty: line.counterparty || '', label: line.suggestedLabel || line.label });
+  const known = hint ? null : catalogueTag(state, `${line.counterparty || ''} ${line.label || ''}`);
   return {
     date: referenceDate(line),
     label: hint?.label || line.suggestedLabel || line.label,
     counterparty: line.counterparty || '',
-    tags: hint?.tags || [],
+    tags: hint?.tags || (known ? [known.tagId] : []),
     envelopeId: line.amount < 0 ? hint?.envelopeId || null : null,
     importance: line.amount < 0 ? hint?.importance || null : null,
     comment: '',

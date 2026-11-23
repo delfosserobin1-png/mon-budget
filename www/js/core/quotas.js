@@ -182,6 +182,6 @@ export function impactText(impact, today = null) {
   if (current) window = periodInfo(impact.period).current;
   else if (impact.from === impact.to) window = `le ${formatDate(impact.from)}`;
   else window = `du ${formatDate(impact.from)} au ${formatDate(impact.to)}`;
-  if (impact.level === 'over') return `Avec cette dépense, « ${impact.name} » dépasse son quota : ${formatAmount(impact.after)} sur ${formatAmount(impact.limit)} ${window}.`;
-  return `Avec cette dépense, « ${impact.name} » atteint ${Math.round((impact.after / impact.limit) * 100)} % de son quota (${formatAmount(impact.after)} sur ${formatAmount(impact.limit)} ${window}).`;
+  if (impact.level === 'over') return `Avec cette sortie, « ${impact.name} » dépasse son quota : ${formatAmount(impact.after)} sur ${formatAmount(impact.limit)} ${window}.`;
+  return `Avec cette sortie, « ${impact.name} » atteint ${Math.round((impact.after / impact.limit) * 100)} % de son quota (${formatAmount(impact.after)} sur ${formatAmount(impact.limit)} ${window}).`;
 }

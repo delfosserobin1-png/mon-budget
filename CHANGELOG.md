@@ -1,5 +1,50 @@
 # Journal des versions
 
+## 2.3.0 — novembre 2026
+
+### Nouveau
+
+- **Bilan** (l'onglet Stats change de nom) : en haut, le tableau de bord du jour — compte courant
+  aujourd'hui et **estimé en fin de mois** (réel déjà daté + prévisions cochées), point le plus bas,
+  **alertes** (découvert aujourd'hui ou à venir, objectif d'enveloppe en retard, sauvegarde trop
+  ancienne, relevé pas importé depuis 40 jours, réponse de Claude, accord bancaire bientôt expiré),
+  **les 7 prochains jours**, les quotas ; en dessous, les statistiques.
+- **Banque connectée** (Plus) : l'ordinateur relève les opérations chez la banque (Enable Banking,
+  accès DSP2 en lecture seule), les chiffre (AES-GCM, phrase secrète) et les dépose dans la boîte
+  privée ; le téléphone les déchiffre et les passe à l'assistant d'import. Outil :
+  `npm run banque`. Reste à faire : ton compte Enable Banking (`docs/connexion-banque.md`).
+- **Sélection multiple → enveloppe** : ranger plusieurs sorties dans une enveloppe d'un geste (ou
+  les ramener sur le compte courant), avec complément proposé si l'enveloppe manque d'argent. Suite
+  au commentaire n° 4.
+- **Premier rangement des commerçants courants** à l'import (Carrefour → Courses, SNCF → Transport…),
+  si un tag de ce nom existe ; une règle apprise passe toujours avant.
+
+### Changé
+
+- **Sortie / Entrée** remplacent Dépense / Revenu dans toute l'appli (formulaires, filtres, Bilan,
+  exports Excel, mode d'emploi).
+- Les compléments d'enveloppe disent « ajouter depuis le compte courant » au lieu de « virer ».
+
+### À décider
+
+- **Relève programmée des commentaires** : les tâches créées le 18-11 s'arrêtaient toutes à leur
+  première commande (aucune autorisation réglée), si bien que rien n'était traité. Supprimées pour
+  être recréées dans le mode de la conversation, leur recréation a été refusée par le garde-fou de
+  sécurité de Claude. À recréer par toi dans l'appli Claude (avec le mode d'autorisation de ton
+  choix), ou sur ta demande explicite.
+- **Traitement immédiat** : un garde-fou de sécurité ne se contourne pas, même avec ton accord ;
+  voir `docs/connexion-claude.md` pour les autres voies.
+
+### Sous le capot
+
+- `core/dashboard.js` (Bilan), `core/categories.js` (catalogue), `core/chiffre.js` (chiffrement
+  partagé PC / téléphone), `tools/banque.mjs` (Enable Banking), format de relevé « mon-budget-banque »
+  lu par `io/statement/text-formats.js`, `ui/screens/bank.js`, `www/banque-retour.html`.
+- `docs/feuille-de-route.md` : plusieurs comptes, partage, comptes utilisateurs, RGPD, CGU, étapes
+  d'une publication officielle.
+- 209 tests du moteur (17 nouveaux, dont un faux Enable Banking qui vérifie la signature du jeton) et
+  69 parcours dans un vrai navigateur (7 nouveaux).
+
 ## 2.2.0 — novembre 2026
 
 ### Nouveau

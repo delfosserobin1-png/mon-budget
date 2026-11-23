@@ -82,7 +82,7 @@ test('titre de l’envoi : type entre crochets, première ligne, coupée proprem
   assert.equal(commentTitle(makeBugReport(report({ text: '   ' }))), '[Problème] Commentaire');
   assert.deepEqual(COMMENT_KINDS.map((k) => k.id), ['bug', 'idee', 'question']);
   assert.equal(kindLabel('inconnu'), 'Problème');
-  assert.equal(screenLabel('stats'), 'Stats');
+  assert.equal(screenLabel('stats'), 'Bilan');
   assert.equal(screenLabel('nimporte'), "Toute l'appli");
 });
 

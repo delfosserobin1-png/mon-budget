@@ -2,7 +2,7 @@
 //
 // Quel que soit le format du fichier, on obtient le même objet « relevé normalisé » :
 // {
-//   format: 'pdf' | 'ofx' | 'csv', bank, accountLabel,
+//   format: 'pdf' | 'ofx' | 'csv' | 'api' (connexion bancaire), bank, accountLabel,
 //   periodStart, periodEnd,
 //   openingDate, openingBalance,      // solde précédent imprimé (centimes) — null si absent
 //   closingDate, closingBalance,      // nouveau solde imprimé — null si absent
@@ -15,7 +15,7 @@
 
 import { sha256 } from '../../core/sha256.js';
 import { parseStatementPages, StatementError } from './pdf-table.js';
-import { decodeBytes, looksLikeOfx, parseCsvStatement, parseOfx } from './text-formats.js';
+import { decodeBytes, looksLikeBankJson, looksLikeOfx, parseBankJson, parseCsvStatement, parseOfx } from './text-formats.js';
 
 export { StatementError };
 
@@ -37,6 +37,7 @@ export function kindOfFile(name, bytes) {
   if (head === '%PDF-' || lower.endsWith('.pdf')) return 'pdf';
   if (lower.endsWith('.ofx') || lower.endsWith('.qfx')) return 'ofx';
   if (lower.endsWith('.csv') || lower.endsWith('.txt') || lower.endsWith('.tsv')) return 'csv';
+  if (lower.endsWith('.json')) return 'json';
   return 'unknown';
 }
 
@@ -54,6 +55,7 @@ export async function readStatementFile({ name, bytes }, pdfTools) {
     return seal(parseStatementPages(pages));
   }
   const text = decodeBytes(bytes);
+  if (kind === 'json' || looksLikeBankJson(text)) return seal(parseBankJson(text));
   if (kind === 'ofx' || looksLikeOfx(text)) return seal(parseOfx(text));
   if (kind === 'csv' || /[;,\t]/.test(text.slice(0, 2000))) return seal(parseCsvStatement(text));
   throw new StatementError('Ce type de fichier n\'est pas pris en charge. Formats acceptés : PDF, OFX, CSV.', 'format');

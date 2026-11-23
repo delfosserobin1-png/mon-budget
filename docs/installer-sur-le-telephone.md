@@ -85,6 +85,11 @@ téléphone. Ces points-ci dépendent du téléphone lui-même et n'ont pas pu l
    glissé ; entourer au doigt fonctionne sans faire défiler l'écran ; la capture qui s'affiche
    ressemble bien à l'écran (polices, couleurs, montants masqués) ; l'envoi arrive chez Claude.
 
+10. **Bilan** (version 2.3.0) : rien ne déborde sur ton écran ; les chiffres du haut correspondent
+    à l'écran Opérations ; toucher une alerte ou une échéance mène au bon endroit.
+11. **Banque connectée** (une fois ton compte Enable Banking créé) : la phrase secrète s'enregistre,
+    « Reprendre les opérations de la banque » ouvre l'assistant d'import avec tes opérations.
+
 Si quelque chose cloche, écris-le dans l'appli : Plus › Commentaires pour Claude (ou avec le bouton
 IA, directement sur l'endroit concerné).
 

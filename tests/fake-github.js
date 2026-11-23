@@ -13,6 +13,8 @@ export function createFakeGithub({ repo = 'moi/mon-budget-commentaires', isPriva
     issuesEnabled,
     issues: [], // { number, title, body, state, labels, created_at, updated_at, closed_at, comments: [...] }
     files: new Map(), // chemin → Uint8Array
+    shas: new Map(), // chemin → empreinte de la version (pour remplacer un fichier, comme le vrai)
+    nextSha: 1,
     requests: [], // { method, path, auth, body }
     offline: false,
     failures: [], // { test(method, path), status, message, times, headers }
@@ -138,13 +140,16 @@ export function createFakeGithub({ repo = 'moi/mon-budget-commentaires', isPriva
       const file = decodeURIComponent(m[1]);
       if (method === 'PUT') {
         if (fake.files.has(file) && !data.sha) return json(422, { message: 'Invalid request. "sha" wasn\'t supplied.' });
+        if (fake.files.has(file) && data.sha !== fake.shas.get(file)) return json(409, { message: `${file} does not match ${data.sha}` });
+        const existed = fake.files.has(file);
         fake.files.set(file, Uint8Array.from(atob(String(data.content || '')), (c) => c.charCodeAt(0)));
-        return json(201, { content: { path: file, html_url: `https://github.com/${fake.repo}/blob/main/${file}` } });
+        fake.shas.set(file, `sha${fake.nextSha++}`);
+        return json(existed ? 200 : 201, { content: { path: file, sha: fake.shas.get(file), html_url: `https://github.com/${fake.repo}/blob/main/${file}` } });
       }
       if (method === 'GET') {
         if (!fake.files.has(file)) return json(404, { message: 'Not Found' });
         if ((lower.accept || '').includes('raw')) return { status: 200, bytes: fake.files.get(file), headers: {} };
-        return json(200, { path: file, type: 'file' });
+        return json(200, { path: file, type: 'file', sha: fake.shas.get(file) });
       }
     }
     return json(404, { message: `Route inconnue du faux GitHub : ${method} ${rest}` });

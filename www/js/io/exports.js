@@ -12,7 +12,7 @@ import { quotaStatus, quotaText } from '../core/quotas.js';
 import { buildCsv, buildXlsx } from './xlsx.js';
 
 const yesNo = (v) => (v ? 'oui' : 'non');
-const TYPE_LABEL = { expense: 'Dépense', income: 'Revenu', transfer: "Mouvement d'enveloppe", adjustment: 'Ajustement' };
+const TYPE_LABEL = { expense: 'Sortie', income: 'Entrée', transfer: "Mouvement d'enveloppe", adjustment: 'Ajustement' };
 
 function operationsSheet(state, operations) {
   const tags = new Map(state.tags.map((t) => [t.id, t.name]));
@@ -116,7 +116,7 @@ export function sheetsFor(state, { today }) {
     ],
     rows: state.recurring.map((r) => [
       r.label,
-      r.kind === KIND.TRANSFER ? 'Mise de côté' : r.amount < 0 ? 'Dépense' : 'Revenu',
+      r.kind === KIND.TRANSFER ? 'Mise de côté' : r.amount < 0 ? 'Sortie' : 'Entrée',
       toEuros(r.amount),
       frequencyLabel(r.frequency, r.interval),
       r.startDate,

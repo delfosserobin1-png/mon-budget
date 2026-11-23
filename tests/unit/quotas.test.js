@@ -121,10 +121,10 @@ test('à la saisie : prévenir quand une dépense fait atteindre ou dépasser un
   assert.deepEqual(quotaImpact(state, draft(10)), [], '150 € sur 200 € : rien à dire');
   const [warn] = quotaImpact(state, draft(25));
   assert.deepEqual([warn.level, warn.before, warn.after, warn.limit, warn.from, warn.to], ['warn', 14000, 16500, 20000, '2026-11-01', '2026-11-30']);
-  assert.equal(impactText(warn, TODAY), 'Avec cette dépense, « Restaurant » atteint 83 % de son quota (165,00 € sur 200,00 € ce mois-ci).');
+  assert.equal(impactText(warn, TODAY), 'Avec cette sortie, « Restaurant » atteint 83 % de son quota (165,00 € sur 200,00 € ce mois-ci).');
   const [over] = quotaImpact(state, draft(70));
   assert.equal(over.level, 'over');
-  assert.equal(impactText(over, TODAY), 'Avec cette dépense, « Restaurant » dépasse son quota : 210,00 € sur 200,00 € ce mois-ci.');
+  assert.equal(impactText(over, TODAY), 'Avec cette sortie, « Restaurant » dépasse son quota : 210,00 € sur 200,00 € ce mois-ci.');
   // une dépense datée d'un autre mois se compare à CE mois-là
   const [past] = quotaImpact(state, draft(170, { date: '2026-10-10' }));
   assert.deepEqual([past.level, past.before, past.from], ['warn', 0, '2026-10-01']);

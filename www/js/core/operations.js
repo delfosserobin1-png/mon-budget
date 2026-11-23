@@ -100,7 +100,7 @@ export function planSaveOperation(state, input, { today }) {
       errors.push(
         err(
           'envelopeId',
-          `Un revenu arrive toujours sur le compte courant. Enregistre-le là, puis alimente « ${env.name} » depuis sa fiche.`,
+          `Une entrée arrive toujours sur le compte courant. Enregistre-la là, puis alimente « ${env.name} » depuis sa fiche.`,
           'credit-in-envelope',
           { envelopeId },
         ),
@@ -249,6 +249,51 @@ export function planAddTag(state, ids, tagId) {
     }
   }
   return { ok: true, cs: draft.cs };
+}
+
+/**
+ * Range plusieurs sorties dans une enveloppe, ou les ramène sur le compte courant (envelopeId null).
+ * Les entrées, les mouvements d'enveloppe et les ajustements ne bougent pas (une entrée arrive
+ * toujours sur le compte courant) : `skipped` dit combien. Comme planSaveOperation, si une enveloppe
+ * passe en négatif, le plan réussit mais renvoie `topups`, à proposer avant d'enregistrer.
+ * Renvoie { ok, cs, moved, skipped, unchanged, topups } ou { ok: false, errors }.
+ */
+export function planSetEnvelope(state, ids, envelopeId, { today }) {
+  const target = envelopeId || null;
+  if (target) {
+    const env = state.envelopes.find((e) => e.id === target);
+    if (!env) return { ok: false, errors: [err('envelopeId', "Cette enveloppe n'existe plus.", 'missing-envelope')] };
+    if (env.closed) return { ok: false, errors: [err('envelopeId', `« ${env.name} » est clôturée : rouvre-la pour y ranger des opérations.`, 'closed-envelope')] };
+  }
+  const draft = new Draft(state);
+  let moved = 0;
+  let skipped = 0;
+  let unchanged = 0;
+  let firstDate = null;
+  const now = new Date().toISOString();
+  for (const id of ids) {
+    const op = draft.get('operations', id);
+    if (!op) continue;
+    if (op.kind !== KIND.OPERATION || op.amount >= 0) {
+      skipped++;
+      continue;
+    }
+    if ((op.envelopeId || null) === target) {
+      unchanged++;
+      continue;
+    }
+    draft.put('operations', { ...op, envelopeId: target, updatedAt: now });
+    moved++;
+    if (!op.simulated && (!firstDate || op.date < firstDate)) firstDate = op.date;
+  }
+  if (!moved) {
+    const message = skipped && !unchanged ? 'Seules les sorties se rangent dans une enveloppe : une entrée arrive toujours sur le compte courant.' : 'Ces opérations sont déjà rangées là.';
+    return { ok: false, errors: [err('ids', message, skipped && !unchanged ? 'nothing-to-move' : 'unchanged')] };
+  }
+  // Le complément est daté de la plus ancienne sortie déplacée : l'enveloppe n'est jamais à découvert.
+  const shortfalls = findEnvelopeShortfalls(state, draft.state, today);
+  const topups = shortfalls.map((s) => ({ envelopeId: s.envelopeId, amount: s.shortfall, date: firstDate || today }));
+  return { ok: true, cs: draft.cs, moved, skipped, unchanged, topups };
 }
 
 /** Ce qu'une enveloppe peut encore sortir à une date donnée (pour les messages de l'interface). */

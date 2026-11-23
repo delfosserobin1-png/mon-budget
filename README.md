@@ -5,7 +5,7 @@ rapprochement avec la banque, statistiques. Elle s'installe sur le téléphone c
 normale, marche sans connexion, et tes comptes restent sur le téléphone : ils ne sont jamais envoyés
 sur internet.
 
-Version 2.2.0, en ligne : **https://delfosserobin1-png.github.io/mon-budget/**
+Version 2.3.0, en ligne : **https://delfosserobin1-png.github.io/mon-budget/**
 
 ## Par où commencer
 
@@ -19,13 +19,15 @@ Version 2.2.0, en ligne : **https://delfosserobin1-png.github.io/mon-budget/**
 | obtenir un APK à l'ancienne | lis `docs/guide-apk.md` (une commande : `npm run apk`) |
 | comprendre comment c'est construit | lis `docs/architecture.md` |
 | savoir ce qui a été décidé et pourquoi | lis `docs/decisions.md` |
+| connecter ta banque | lis `docs/connexion-banque.md` |
+| préparer la suite (plusieurs comptes, partage, publication) | lis `docs/feuille-de-route.md` |
 | comparer avec ce que tu avais demandé | lis `docs/cahier-des-charges.md` |
 
 ## Ce que fait l'appli
 
-- **Opérations** : dépenses et revenus avec date, heure, montant, libellé, tiers, commentaire, photo
+- **Opérations** : sorties et entrées avec date, heure, montant, libellé, tiers, commentaire, photo
   du ticket, importance (nécessité, confort, caprice), tags libres. Recherche, filtres croisés,
-  sélection multiple, annulation sur 5 niveaux.
+  sélection multiple (supprimer, taguer, ranger dans une enveloppe), annulation sur 5 niveaux.
 - **Enveloppes** : de l'argent mis de côté pour un projet, avec objectif et échéance. Alimenter,
   retirer, virer d'une enveloppe à l'autre, dépenser dedans. Jamais négatives. Clôture avec bilan,
   réouverture.
@@ -33,7 +35,10 @@ Version 2.2.0, en ligne : **https://delfosserobin1-png.github.io/mon-budget/**
   (salaire, loyer, abonnements, virements automatiques vers une enveloppe).
 - **Banque** : import de relevé PDF, OFX ou CSV avec un assistant qui passe en revue les
   correspondances, ce qui manque et ce qui est en trop, puis vérifie les soldes. Rapprochement manuel.
-- **Stats** : neuf graphiques, cliquables, chacun avec sa version tableau.
+  **Banque connectée** : les opérations relevées chez la banque par l'ordinateur (Enable Banking),
+  chiffrées, reprises d'un geste sur le téléphone.
+- **Bilan** : compte courant aujourd'hui et en fin de mois, alertes, 7 prochains jours, quotas, puis
+  neuf graphiques cliquables, chacun avec sa version tableau.
 - **Données** : sauvegarde complète (ZIP avec les photos), export Excel et CSV, import en ajout ou en
   remplacement, copie quotidienne dans un dossier du téléphone, rappel de sauvegarde.
 - **Appli installable** : icône sur l'écran d'accueil, plein écran, fonctionnement sans connexion,
@@ -50,7 +55,7 @@ Version 2.2.0, en ligne : **https://delfosserobin1-png.github.io/mon-budget/**
 
 ```
 www/            l'appli (c'est ce dossier qui est publié, et embarqué dans l'APK)
-tests/          192 tests du moteur + 64 parcours dans un vrai navigateur
+tests/          209 tests du moteur + 69 parcours dans un vrai navigateur
 tools/          serveur local, liste des fichiers hors connexion, publication, lecture des
                 commentaires, fichier unique, APK
 docs/           installation, connexion à Claude, publication, architecture, décisions, cahier des
@@ -70,6 +75,7 @@ npx playwright install chromium  (une fois) le navigateur des tests de bout en b
 npm run test:e2e                 parcours complets dans le navigateur
 npm run pwa                      refaire la liste des fichiers (après toute modification de www/)
 npm run commentaires -- lire     lire les commentaires envoyés depuis l'appli
+npm run banque -- etat           la connexion à la banque (voir docs/connexion-banque.md)
 npm run publier -- "message"     contrôler, envoyer, vérifier la mise en ligne
 npm run build:fichier-unique     refaire dist/mon-budget.html
 npm run apk                      fabriquer l'APK

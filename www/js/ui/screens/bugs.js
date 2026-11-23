@@ -28,7 +28,7 @@ import { copyText, deviceSummary, saveFile, shareFile, shareText } from '../../p
 
 const KIND_ICONS = { bug: 'bug', idee: 'bulb', question: 'help' };
 const FORM_TEXTS = {
-  bug: { label: "Que s'est-il passé ?", placeholder: "Ex. : en enregistrant une dépense dans l'enveloppe Vacances, le solde n'a pas bougé.", error: "Décris en une phrase ce qui s'est passé." },
+  bug: { label: "Que s'est-il passé ?", placeholder: "Ex. : en enregistrant une sortie dans l'enveloppe Vacances, le solde n'a pas bougé.", error: "Décris en une phrase ce qui s'est passé." },
   idee: { label: 'Quelle est ton idée ?', placeholder: 'Ex. : dans Stats, je voudrais voir le total par mois sur une seule ligne.', error: 'Décris ton idée en une phrase.' },
   question: { label: 'Quelle est ta question ?', placeholder: 'Ex. : à quoi sert le bouton « Elle a eu lieu » dans les prévisions ?', error: 'Décris ta question en une phrase.' },
 };

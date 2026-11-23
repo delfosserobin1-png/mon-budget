@@ -8,9 +8,12 @@ import { createGuideScreen } from './guide.js';
 import { createBugsScreen } from './bugs.js';
 import { createClaudeScreen } from './claude.js';
 import { createStatementScreen } from './statement.js';
+import { createBankScreen } from './bank.js';
 
 export const SUB_SCREENS = {
   statement: createStatementScreen,
+  bank: createBankScreen, // « Banque connectée » : opérations relevées par l'ordinateur
+
   reconcile: createReconcileScreen,
   archives: createArchivesScreen,
   backup: createBackupScreen,

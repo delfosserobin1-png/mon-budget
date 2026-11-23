@@ -6,19 +6,29 @@ que tu fais sans jargon.
 
 ## Où en est le projet
 
-Version 2.2.0. L'appli (dossier `www/`) est terminée et testée. Depuis la 2.1.0 elle est d'abord une
+Version 2.3.0. L'appli (dossier `www/`) est terminée et testée. Depuis la 2.1.0 elle est d'abord une
 **appli web installable (PWA)** : elle s'installe sur le téléphone depuis une adresse internet, a son
 icône, marche sans connexion, se met à jour toute seule, et l'utilisateur peut écrire à Claude
 depuis l'appli (« Commentaires pour Claude »). La 2.2.0 ajoute le **bouton IA** (entourer un endroit
-de l'écran et le commenter), les **quotas par tag**, et retire « Virement » du bouton +.
+de l'écran et le commenter) et les **quotas par tag**. La 2.3.0 : l'onglet Stats devient **Bilan**
+(tableau de bord du jour en haut), **Sortie / Entrée** remplacent Dépense / Revenu, rangement de
+plusieurs sorties dans une enveloppe, et la **banque connectée** (Enable Banking, `npm run banque`,
+`docs/connexion-banque.md`) — construite et testée, elle attend le compte Enable Banking de
+l'utilisateur (c'est lui qui le crée ; ne jamais lui demander son mot de passe).
 La voie APK (Capacitor) reste possible avec le même dossier `www/`, mais n'est plus la voie principale.
+La suite (plusieurs comptes, partage, ouverture au public) est étudiée dans `docs/feuille-de-route.md`.
 
-Relève des commentaires : une **tâche programmée** de l'appli Claude de ce PC, 4 fois par jour
-(3 h 30, 9 h, 15 h, 21 h 30), suit la section « Traiter les commentaires » ci-dessous. Un traitement
-**immédiat** (Claude Code en ligne de commande lancé par un programme de surveillance) a été refusé
-par le garde-fou de sécurité de Claude le 18-11-2026 (Claude qui modifie et publie sans personne
-pour le lancer ni le surveiller) : ne pas le mettre en place sans une décision explicite de
-l'utilisateur, qui installerait lui-même Claude Code en ligne de commande.
+Relève des commentaires : des **tâches programmées** de l'appli Claude de ce PC (4 fois par jour :
+3 h 30, 9 h, 15 h, 21 h 30) suivent la section « Traiter les commentaires » ci-dessous. Créées le
+18-11-2026 sans mode d'autorisation, elles s'arrêtaient à la première commande ; supprimées le
+24-11-2026 pour être recréées dans le mode de la conversation, leur recréation a été **refusée par
+le garde-fou de sécurité**. C'est à l'utilisateur de les recréer (dans l'appli Claude, avec le mode
+de son choix) ou de demander qu'on le fasse ; ne pas les recréer de sa propre initiative. Un
+traitement **immédiat** (Claude Code en ligne de commande lancé par un programme de surveillance) a
+été refusé par le garde-fou de sécurité de Claude le 18-11-2026 ; le 24-11-2026, l'utilisateur a
+proposé de l'autoriser « exceptionnellement » : un garde-fou de sécurité ne se contourne pas, même
+avec son accord. Ne pas le mettre en place sans une décision explicite de l'utilisateur, qui
+installerait lui-même Claude Code en ligne de commande.
 
 **Publication en place depuis le 17-11-2026** (`docs/publication.md`) :
 
@@ -50,6 +60,7 @@ obligatoire : `www/` est servi tel quel.
 | `npm run pwa` | refait la liste des fichiers de `www/sw.js` — **après toute modification de `www/`** |
 | `npm run pwa:icones` | refait les icônes PNG de `www/icons/` |
 | `npm run commentaires -- lire` | les commentaires envoyés depuis l'appli (voir plus bas) |
+| `npm run banque -- etat` | la connexion à la banque ; `relever` pour déposer les opérations (`docs/connexion-banque.md`) |
 | `npm run publier -- "message"` | contrôles, envoi, vérification du site (`-- verifier` : contrôles seuls) |
 | `npm run build:fichier-unique` | `dist/mon-budget.html`, l'appli en un seul fichier pour PC |
 | `npm run apk` | fabrique l'APK (voir `docs/guide-apk.md` ; demande JDK 21 et SDK Android) |
@@ -86,8 +97,13 @@ www/
       stats.js filters.js        calculs des graphiques, recherche et filtres
       portable.js                export / import JSON, reprise des données de la v1
       comments.js                commentaires pour Claude : texte envoyé, statuts, fil, lots
+      dashboard.js               Bilan : fin du mois, à venir, objectifs en retard, alertes
+      categories.js              premier rangement des commerçants courants (import)
+      chiffre.js                 chiffrement par phrase secrète (AES-GCM), identique PC et téléphone
+      quotas.js                  quotas par tag
       demo.js                    jeu de données d'exemple
-    io/        formats de fichiers : zip.js, xlsx.js, exports.js, statement/ (PDF, OFX, CSV)
+    io/        formats de fichiers : zip.js, xlsx.js, exports.js, statement/ (PDF, OFX, CSV, et le
+               relevé JSON « mon-budget-banque » de la banque connectée)
                github.js : le seul code qui parle à internet (boîte à commentaires)
     data/      db.js (IndexedDB + repli mémoire), store.js (état, commit, undo), backup.js,
                claude-link.js (envoi des commentaires, file d'attente, relève des réponses)
@@ -100,13 +116,18 @@ www/
                annotate.js : le bouton IA (entourer un endroit de l'écran, commenter, envoyer)
                capture.js : photo de l'écran de l'appli (DOM → SVG → PNG), montants masquables
                quotas-ui.js : jauges des quotas de tags (moteur : core/quotas.js)
+               dashboard.js : le haut de l'écran Bilan (moteur : core/dashboard.js)
+               screens/bank.js : Plus › Banque connectée (phrase secrète, reprise du relevé)
+  banque-retour.html             page de retour de la banque après l'accord (affiche le code)
 tests/unit/    node:test — moteur, formats, stockage, commentaires, faux GitHub, PWA, outils
 tests/e2e/     node:test + Playwright — parcours complets, horloge figée au 15-11-2026
 tests/fake-github.js   faux GitHub en mémoire, partagé par les deux familles de tests
-tools/         serve.mjs, pwa.mjs, publier.mjs, commentaires.mjs, build-single.mjs,
+tests/fake-enablebanking.js   faux Enable Banking (vérifie le jeton JWT, pages d'opérations)
+tools/         serve.mjs, pwa.mjs, publier.mjs, commentaires.mjs, banque.mjs, build-single.mjs,
                make-pwa-icons.mjs, android.mjs (+ android-tweaks.mjs), générateurs
 docs/          architecture, décisions, cahier des charges, installation, connexion à Claude,
-               publication, connexion bancaire (options, rien de construit), guide APK
+               publication, connexion bancaire (construite, attend le compte Enable Banking),
+               feuille de route (plusieurs comptes, partage, publication officielle), guide APK
 ```
 
 Principes à respecter :
@@ -122,6 +143,9 @@ Principes à respecter :
 - **Réseau** : aucune bibliothèque chargée depuis internet. Les seuls échanges sont (1) la recherche
   des mises à jour de l'appli sur son propre site, (2) `api.github.com` par `io/github.js`, et
   seulement si l'utilisateur a réglé la connexion à Claude. Les données du budget ne sortent jamais.
+  La banque connectée va dans l'autre sens : l'ordinateur dépose un relevé **chiffré** dans la boîte
+  privée, le téléphone le lit. La clé Enable Banking et `mon-budget.banque.json` (phrase secrète,
+  session) restent sur l'ordinateur, ignorés par git : ne jamais les copier, les afficher ni les publier.
 
 ## Règles de produit (demandées par l'utilisateur, ne pas les « corriger »)
 
@@ -132,8 +156,10 @@ Principes à respecter :
   enveloppes = ce que voit la banque). Les deux s'accompagnent d'un bouton d'information.
 - Une **enveloppe ne peut jamais être négative** : une dépense qui dépasse propose un complément
   depuis le compte courant ; un retrait qui dépasse est refusé avec une explication.
-- Un revenu arrive toujours sur le compte courant (on peut enchaîner l'alimentation d'une enveloppe).
-- **Le bouton + ne propose que Dépense et Revenu** (2.2.0). Les mouvements d'enveloppe se font depuis
+- Une entrée arrive toujours sur le compte courant (on peut enchaîner l'alimentation d'une enveloppe).
+- Vocabulaire des types : **Sortie** et **Entrée** (2.3.0, à la demande de l'utilisateur ; plus
+  « Dépense » ni « Revenu » à l'écran). En interne : `expense` / `income`.
+- **Le bouton + ne propose que Sortie et Entrée** (2.2.0). Les mouvements d'enveloppe se font depuis
   la fiche de l'enveloppe et s'appellent **Alimentation**, **Retrait**, **Déplacement**
   (`moveLabel` dans `core/operations.js`) ; « Mise de côté » pour une récurrence. Le mot
   « virement » est réservé aux vrais virements bancaires (relevés). En interne, le type reste
@@ -141,9 +167,10 @@ Principes à respecter :
 - **Quotas par tag** : un plafond par jour, semaine (lundi → dimanche), mois, année ou entre deux dates ;
   dépenses moins remboursements, prévisions à part ; prévenir à 80 % et au moment de saisir une
   dépense qui ferait dépasser (sans jamais bloquer).
-- **Bouton IA** sur tous les écrans (sauf verrouillage), déplaçable le long du bord droit, masquable
+- **Bouton IA** sur tous les écrans (sauf verrouillage), déplaçable le long du bord (droit ou gauche), masquable
   dans Plus › Commentaires pour Claude. Capture avec montants masqués par défaut.
-- Onglets, dans cet ordre : Opérations, Enveloppes, **Prévisions (3e)**, Stats, Plus.
+- Onglets, dans cet ordre : Opérations, Enveloppes, **Prévisions (3e)**, **Bilan** (identifiant
+  interne `stats`), Plus. Le Bilan commence par le tableau de bord du jour, puis les statistiques.
 - « Annuler » : une pastille discrète en bas à gauche, 5 niveaux, couvre création, modification, suppression.
 - Toucher une opération ouvre sa fiche (jamais une demande de suppression directe).
 - Import : toujours le choix entre **ajouter** (la base grandit) et **remplacer**.
@@ -161,7 +188,8 @@ Principes à respecter :
 - `bugReports` contient les **commentaires pour Claude** (le nom date de la v2.0.0). Champs ajoutés en
   2.1.0 : `kind` (bug / idee / question), `queued`, `remote` (numéro, état, fil de discussion).
 - Réglages `link:*` (dans `kv`) : propres à l'appareil, gardés par « Tout effacer », jamais exportés.
-  `link:claude` = `{ repo, token, private, … }` ; `link:folder` = le dossier choisi.
+  `link:claude` = `{ repo, token, private, … }` ; `link:folder` = le dossier choisi ;
+  `link:bankPhrase` = la phrase secrète de la banque connectée ; `link:bank` = le dernier relevé repris.
   **Le jeton ne doit apparaître nulle part ailleurs** : ni sauvegarde, ni diagnostic, ni écran, ni
   message d'erreur, ni adresse. Des tests le vérifient ; garde-les verts.
 - Fichiers lisibles (copies de confort, la vérité est dans IndexedDB), sous-dossiers `Sauvegardes/`
@@ -220,6 +248,12 @@ Règles quand personne ne regarde (relève programmée) :
   ouvert, puis range ton essai (`git stash push --include-untracked -m "Relève du JJ-MM : non
   publié"`) pour laisser le dossier propre ; sinon toutes les relèves suivantes s'arrêtent à l'étape 0.
 - Une seule publication par relève, même pour plusieurs commentaires. Jamais de `push --force`.
+
+Banque connectée pendant une relève : à la relève de **3 h 30 seulement** (les banques limitent les
+relevés sans l'utilisateur à environ 4 par jour), si `mon-budget.banque.json` existe et contient une
+`sessionId`, lancer `npm run banque -- relever` (indépendant de l'étape 0 : il ne modifie aucun
+fichier du dépôt). En cas d'échec, le dire dans le compte rendu, sans rien tenter d'autre (un accord
+expiré se renouvelle avec l'utilisateur : « connecter » puis « valider »).
 
 Réglages : `mon-budget.config.json` (`commentaires`, `adresse`) ; modèle dans
 `mon-budget.config.exemple.json`. Le jeton vient de `gh auth token` ou de la variable

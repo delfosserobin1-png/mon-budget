@@ -6,7 +6,7 @@ import { KIND } from '../../www/js/core/schema.js';
 import { computeBalances, envelopeLowPoint, deltaFor, projectAvailable } from '../../www/js/core/balances.js';
 import {
   planSaveOperation, topupChangeset, planCreditThenTransfer, planSaveTransfer, planDeleteOperations,
-  planSetChecked, planConfirmSimulation, planAddTag, operationTitle, moveKind, moveLabel, moveTitle, moveDoneLabel,
+  planSetChecked, planConfirmSimulation, planAddTag, operationTitle, moveKind, moveLabel, moveTitle, moveDoneLabel, planSetEnvelope,
 } from '../../www/js/core/operations.js';
 import { planSaveEnvelope, planCloseEnvelope, planReopenEnvelope, planDeleteEnvelope, envelopeReport, envelopeUsage } from '../../www/js/core/envelopes.js';
 import { planSaveTag, planDeleteTag, tagUsage } from '../../www/js/core/tags.js';
@@ -336,4 +336,56 @@ test('vocabulaire : un mouvement d’enveloppe est une alimentation, un retrait 
   assert.deepEqual([moveTitle('', 'env_a'), moveTitle('env_a', ''), moveTitle('env_a', 'env_b')], ['Alimenter une enveloppe', "Retirer d'une enveloppe", 'Déplacer entre enveloppes']);
   assert.equal(moveDoneLabel('', 'env_a'), 'Enveloppe alimentée');
   for (const text of [moveLabel('', 'x'), moveTitle('x', ''), moveDoneLabel('x', 'y')]) assert.ok(!/virement/i.test(text));
+});
+test('sélection multiple : ranger des sorties dans une enveloppe (commentaire n° 4) ; les entrées restent sur le compte courant', () => {
+  let state = stateWith({
+    envelopes: [ENV, ENV_B, { id: 'env_c', name: 'Clôturée', closed: true }],
+    operations: [
+      op({ id: 'op_sal', amount: 200000, label: 'Salaire', date: '2026-11-01' }),
+      transfer(null, 'env_a', 20000, { date: '2026-11-02' }),
+      op({ id: 'op_bois', amount: -4500, label: 'Bois', date: '2026-11-10' }),
+      op({ id: 'op_vis', amount: -1200, label: 'Vis', date: '2026-11-12' }),
+      op({ id: 'op_remb', amount: 3000, label: 'Remboursement', date: '2026-11-13' }),
+      op({ id: 'op_deja', amount: -800, label: 'Colle', envelopeId: 'env_a', date: '2026-11-14' }),
+    ],
+  });
+  const ids = ['op_bois', 'op_vis', 'op_remb', 'op_deja'];
+  const plan = planSetEnvelope(state, ids, 'env_a', ctx);
+  assert.equal(plan.ok, true);
+  assert.deepEqual([plan.moved, plan.skipped, plan.unchanged, plan.topups], [2, 1, 1, []]);
+  const before = balances(state);
+  state = commit(state, plan);
+  const after = balances(state);
+  assert.equal(after.total, before.total, 'le solde total ne bouge pas');
+  assert.deepEqual([after.available - before.available, after.envelopes.env_a - before.envelopes.env_a], [5700, -5700]);
+  assert.equal(state.operations.find((o) => o.id === 'op_remb').envelopeId, null, 'une entrée reste sur le compte courant');
+
+  // et les ramener sur le compte courant
+  const back = planSetEnvelope(state, ['op_bois', 'op_vis'], null, ctx);
+  assert.deepEqual([back.ok, back.moved], [true, 2]);
+  assert.equal(balances(commit(state, back)).envelopes.env_a, 20000 - 800);
+
+  // rien à faire, enveloppe clôturée ou disparue : refusé avec une explication
+  assert.equal(planSetEnvelope(state, ['op_remb'], 'env_a', ctx).errors[0].code, 'nothing-to-move');
+  assert.equal(planSetEnvelope(state, ['op_bois'], 'env_a', ctx).errors[0].code, 'unchanged');
+  assert.equal(planSetEnvelope(state, ['op_bois'], 'env_c', ctx).errors[0].code, 'closed-envelope');
+  assert.equal(planSetEnvelope(state, ['op_bois'], 'env_zz', ctx).errors[0].code, 'missing-envelope');
+});
+
+test('sélection multiple : une enveloppe trop peu garnie reçoit un complément daté de la plus ancienne sortie rangée', () => {
+  const state = stateWith({
+    envelopes: [ENV_B],
+    operations: [
+      op({ amount: 200000, label: 'Salaire', date: '2026-11-01' }),
+      transfer(null, 'env_b', 5000, { date: '2026-11-02' }),
+      op({ id: 'op_train', amount: -6000, label: 'Train', date: '2026-11-08' }),
+      op({ id: 'op_hotel', amount: -9000, label: 'Hôtel', date: '2026-11-05' }),
+    ],
+  });
+  const plan = planSetEnvelope(state, ['op_train', 'op_hotel'], 'env_b', ctx);
+  assert.equal(plan.ok, true);
+  assert.deepEqual(plan.topups, [{ envelopeId: 'env_b', amount: 10000, date: '2026-11-05' }]);
+  const done = commit(state, { ok: true, cs: merge(plan.cs, topupChangeset(state, plan.topups)) });
+  assert.equal(balances(done).envelopes.env_b, 0, 'l’enveloppe arrive à zéro, jamais en dessous');
+  assert.equal(envelopeLowPoint(done, 'env_b', '2026-11-01'), 0);
 });

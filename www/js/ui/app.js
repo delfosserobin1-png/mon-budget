@@ -37,7 +37,7 @@ import { SUB_SCREENS } from './screens/sub-screens.js';
 import { createLock } from './screens/lock.js';
 import { maybeOnboard } from './screens/onboarding.js';
 
-export const APP_VERSION = '2.2.0';
+export const APP_VERSION = '2.3.0';
 const LOCK_AFTER_MS = 60 * 1000;
 // Réglages propres à l'appareil (connexion à Claude, dossier de copie) : « Tout effacer » les garde.
 const DEVICE_SETTINGS_PREFIX = 'link:';
@@ -46,7 +46,7 @@ const TABS = [
   { id: 'operations', label: 'Opérations', icon: 'list', create: createOperationsScreen },
   { id: 'envelopes', label: 'Enveloppes', icon: 'envelope', create: createEnvelopesScreen },
   { id: 'forecast', label: 'Prévisions', icon: 'calendar', create: createForecastScreen },
-  { id: 'stats', label: 'Stats', icon: 'stats', create: createStatsScreen },
+  { id: 'stats', label: 'Bilan', icon: 'stats', create: createStatsScreen },
   { id: 'more', label: 'Plus', icon: 'more', create: createMoreScreen },
 ];
 

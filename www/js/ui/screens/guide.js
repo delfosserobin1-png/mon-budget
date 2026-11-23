@@ -9,12 +9,12 @@ const SECTIONS = [
   {
     q: "L'essentiel en une minute",
     a: [
-      "Tu notes tes dépenses et tes revenus (bouton **+**). L'appli calcule ce qu'il te reste et te montre où part ton argent.",
+      "Tu notes tes sorties et tes entrées d'argent (bouton **+**). L'appli calcule ce qu'il te reste et te montre où part ton argent.",
       [
         "**Opérations** : la liste de tout ce qui est entré et sorti, la plus récente en haut.",
         "**Enveloppes** : de l'argent mis de côté pour un projet.",
         "**Prévisions** : ce qui va arriver (loyer, salaire…) et le solde que tu auras à une date.",
-        "**Stats** : des graphiques pour comprendre.",
+        "**Bilan** : ton compte aujourd'hui et en fin de mois, ce qui demande ton attention, puis des graphiques pour comprendre.",
         "**Plus** : relevés bancaires, sauvegardes, réglages, commentaires pour Claude.",
       ],
       "Tes comptes restent sur ton téléphone : ils ne sont jamais envoyés sur internet.",
@@ -44,7 +44,7 @@ const SECTIONS = [
     q: 'Compte courant, solde total : quelle différence ?',
     a: [
       "Le **solde total**, c'est ce que ta banque affiche.",
-      "Le **compte courant**, c'est ce même montant, moins ce que tu as rangé dans tes enveloppes. C'est l'argent vraiment disponible pour les dépenses de tous les jours.",
+      "Le **compte courant**, c'est ce même montant, moins ce que tu as rangé dans tes enveloppes. C'est l'argent vraiment disponible pour les sorties de tous les jours.",
       "Exemple : 2 000 € en banque, dont 500 € dans l'enveloppe Vacances. Solde total 2 000 €, compte courant 1 500 €.",
     ],
   },
@@ -54,11 +54,11 @@ const SECTIONS = [
       "Une enveloppe réserve de l'argent pour un projet, sans le sortir de ta banque.",
       [
         "**Alimenter** : mettre de l'argent de côté, du compte courant vers l'enveloppe. +500 € dans l'enveloppe, −500 € sur le compte courant, solde total inchangé.",
-        "**Dépense** : une dépense payée avec l'enveloppe ne touche pas au compte courant.",
+        "**Sortie** : une sortie payée avec l'enveloppe ne touche pas au compte courant. Pour en ranger plusieurs d'un coup : dans Opérations, appui long sur une ligne, coche les autres, puis l'icône enveloppe.",
         "**Retirer** ou **Vers une autre** : pour reprendre l'argent ou le déplacer.",
       ],
-      "Dans la liste des opérations, ces mouvements s'appellent **Alimentation**, **Retrait** et **Déplacement**. Ce ne sont ni des dépenses ni des revenus : l'argent reste à la banque.",
-      "Une enveloppe ne peut pas être à découvert. Si une dépense dépasse ce qu'elle contient, l'appli te propose d'y ajouter la différence depuis le compte courant.",
+      "Dans la liste des opérations, ces mouvements s'appellent **Alimentation**, **Retrait** et **Déplacement**. Ce ne sont ni des sorties ni des entrées : l'argent reste à la banque.",
+      "Une enveloppe ne peut pas être à découvert. Si une sortie dépasse ce qu'elle contient, l'appli te propose d'y ajouter la différence depuis le compte courant.",
       "Tu peux lui donner un **objectif** (montant, date) : une jauge montre où tu en es et combien mettre de côté chaque mois.",
       "Projet terminé ? **Clôture** l'enveloppe : le reste revient sur le compte courant, l'historique et le bilan restent consultables, et tu peux la rouvrir.",
     ],
@@ -66,7 +66,7 @@ const SECTIONS = [
   {
     q: 'Saisir une opération',
     a: [
-      "Bouton **+**, choisis Dépense ou Revenu, tape le montant. Le reste est facultatif :",
+      "Bouton **+**, choisis **Sortie** (l'argent part) ou **Entrée** (l'argent arrive), tape le montant. Le reste est facultatif :",
       [
         "**Libellé** et **destinataire** : pour t'y retrouver et pour les statistiques.",
         "**Importance** : Nécessité, Confort ou Caprice. Utile pour voir ce que tu pourrais réduire.",
@@ -84,10 +84,10 @@ const SECTIONS = [
       "Un **quota** limite ce que tu dépenses pour un tag : par exemple 400 € de Courses par mois, ou 60 € de Restaurant par semaine.",
       [
         "**Régler** : Plus › Tags, touche un tag, active **Quota**, choisis le montant et la période (jour, semaine, mois, année, ou entre deux dates).",
-        "**Suivre** : une jauge apparaît dans Plus › Tags et en haut de l'onglet **Stats**. Touche-la pour voir les dépenses concernées.",
-        "**Être prévenu** : en saisissant une dépense, l'appli te dit si elle fait atteindre 80 % du quota (orange) ou le dépasse (rouge).",
+        "**Suivre** : une jauge apparaît dans Plus › Tags et dans l'onglet **Bilan**. Touche-la pour voir les sorties concernées.",
+        "**Être prévenu** : en saisissant une sortie, l'appli te dit si elle fait atteindre 80 % du quota (orange) ou le dépasse (rouge).",
       ],
-      "Un remboursement portant le même tag redonne de la marge. Les prévisions sont montrées à part (« prévu ») et ne comptent pas encore. La semaine va du lundi au dimanche.",
+      "Une entrée portant le même tag (un remboursement) redonne de la marge. Les prévisions sont montrées à part (« prévu ») et ne comptent pas encore. La semaine va du lundi au dimanche.",
       "Un quota prévient, il n'interdit rien.",
     ],
   },
@@ -132,16 +132,34 @@ const SECTIONS = [
         "**Complet** : Plus › Importer un relevé. L'appli lit ton relevé (PDF, OFX ou CSV) et le compare ligne à ligne avec tes opérations.",
       ],
       "Pendant l'import, trois cas : les opérations **retrouvées** (même montant, date proche) sont complétées avec les informations de la banque ; celles **qui manquent** dans l'appli sont proposées à l'ajout, déjà remplies ; celles **en trop** dans l'appli te sont montrées (souvent un paiement pas encore débité).",
+      "Pour remplir les lignes à ajouter, l'appli se sert de tes habitudes (comment tu as rangé ce commerçant la dernière fois) et, pour un commerçant jamais vu, d'une liste de noms courants (Carrefour → Courses, SNCF → Transport…), si tu as un tag de ce nom.",
       "Une opération retrouvée sur un relevé porte une double coche verte : elle est **pointée**.",
       "Les soldes imprimés sur le relevé servent de preuve : l'appli vérifie que sa lecture retombe dessus au centime près.",
     ],
   },
   {
-    q: 'Les statistiques',
+    q: 'Banque connectée : les opérations sans relevé à télécharger',
     a: [
-      "Choisis la période en haut : tous les graphiques suivent. Touche une barre ou une colonne pour voir les opérations correspondantes.",
-      "Chaque graphique a une icône tableau, en haut à droite de sa carte, pour lire les chiffres exacts.",
-      "Seules les vraies dépenses et les vrais revenus sont comptés : ni les mouvements d'enveloppes (alimentations, retraits), ni les prévisions.",
+      "Une fois la connexion installée (avec Claude, sur l'ordinateur, et ton accord donné dans l'appli de ta banque), l'ordinateur relève chaque nuit les opérations de ton compte, les chiffre et les dépose dans ta boîte privée.",
+      [
+        "Plus › **Banque connectée** : la première fois, saisis la **phrase secrète** affichée par l'ordinateur. Elle reste sur ton téléphone, jamais sauvegardée ni envoyée.",
+        "**Reprendre les opérations de la banque** : l'assistant d'import s'ouvre, comme pour un relevé, et complète ou ajoute ce qu'il faut.",
+      ],
+      "L'accès est en lecture seule. Ton accord à la banque dure 180 jours : le Bilan te prévient avant la fin.",
+    ],
+  },
+  {
+    q: 'Le Bilan : ton tableau de bord',
+    a: [
+      "En haut de l'onglet **Bilan**, ce qui compte aujourd'hui :",
+      [
+        "**Compte courant** et son **estimation en fin de mois** (avec ce qui est déjà daté et tes prévisions cochées), et le point le plus bas d'ici là.",
+        "**À regarder** : un découvert, aujourd'hui ou à venir ; une enveloppe en retard sur son objectif ; une sauvegarde trop ancienne ; un relevé pas importé depuis longtemps ; une réponse de Claude. Chaque alerte a son bouton pour agir.",
+        "**Dans les 7 jours** : ce qui va passer sur ton compte.",
+        "**Quotas en cours**.",
+      ],
+      "En dessous, les **statistiques** : choisis la période, tous les graphiques suivent. Touche une barre ou une colonne pour voir les opérations correspondantes ; l'icône tableau de chaque carte donne les chiffres exacts.",
+      "Seules les vraies sorties et les vraies entrées sont comptées : ni les mouvements d'enveloppes (alimentations, retraits), ni les prévisions.",
     ],
   },
   {
@@ -198,7 +216,7 @@ const SECTIONS = [
     q: "Ce que l'appli ne fait pas",
     a: [
       [
-        "Elle ne se connecte pas à ta banque : c'est toi qui importes tes relevés.",
+        "Elle ne se connecte à ta banque qu'une fois la connexion installée sur l'ordinateur, avec Claude (voir « Banque connectée ») ; sinon, c'est toi qui importes tes relevés.",
         "Elle gère un seul compte bancaire (avec autant d'enveloppes que tu veux).",
         "Elle ne synchronise pas entre plusieurs téléphones : on passe par une sauvegarde.",
       ],

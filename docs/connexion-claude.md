@@ -96,11 +96,12 @@ Touche un commentaire pour lire le fil et répondre. Répondre à un commentaire
 
 ## Comment Claude s'en occupe
 
-**Automatiquement, 4 fois par jour** (3 h 30, 9 h, 15 h, 21 h 30) : une tâche programmée de
-l'appli Claude de ton ordinateur relève la boîte et traite ce qui attend. Il faut que l'ordinateur
-soit allumé et l'appli Claude ouverte ; sinon, la relève se fait à la prochaine ouverture. Tu la
-retrouves (et peux la modifier ou la mettre en pause) dans l'appli Claude, rubrique des tâches
-programmées.
+**Automatiquement** (3 h 30, 9 h, 15 h, 21 h 30) : des tâches programmées de l'appli Claude de ton
+ordinateur relèvent la boîte et traitent ce qui attend, ordinateur allumé et appli Claude ouverte.
+Elles se créent dans l'appli Claude, rubrique des tâches programmées, où tu choisis aussi leur mode
+d'autorisation : sans autorisation réglée, une relève s'arrête à sa première commande et attend
+quelqu'un. (Au 24-11-2026 il n'y en a plus : leur recréation a été refusée par le garde-fou de
+sécurité de Claude ; c'est à toi de les recréer, ou de décider de t'en passer.)
 
 **À la demande**, quand tu veux : dans l'appli Claude (sur l'ordinateur, ou sur le téléphone), ouvre
 le projet et écris par exemple :
@@ -117,8 +118,15 @@ demandes claires et sans risque, et répond par une question dans l'appli pour t
 
 Un traitement **immédiat**, à la minute où tu envoies, demanderait un Claude qui tourne en
 permanence sur l'ordinateur et modifie l'appli sans que personne ne le lance. Le garde-fou de
-sécurité de Claude a refusé de le mettre en place de lui-même ; c'est à toi d'en décider
-(voir `CHANGELOG.md`, version 2.2.0).
+sécurité de Claude a refusé de le mettre en place de lui-même, et il ne se contourne pas, même avec
+ton accord. Ce qui reste possible :
+
+- **le plus rapide, sans rien installer** : depuis l'appli Claude de ton téléphone, reprends la
+  conversation du projet ouverte sur l'ordinateur (contrôle à distance) et écris « traite mes
+  commentaires » : c'est fait dans la foulée, et tu vois ce que fait Claude ;
+- **les relèves programmées**, plus ou moins souvent (on peut passer à toutes les heures en journée) ;
+- **installer toi-même Claude Code en ligne de commande**, si tu veux un vrai traitement automatique :
+  c'est ta décision, et on construirait ensuite la surveillance ensemble.
 
 ### Demander une modification sans passer par l'appli
 

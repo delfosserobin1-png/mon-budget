@@ -3,6 +3,10 @@ dist/
 tests/e2e/captures/
 # captures d'écran jointes aux commentaires (elles peuvent montrer des montants)
 commentaires/
+# connexion à la banque : accès, phrase secrète et clé privée restent sur cet ordinateur
+mon-budget.banque.json
+*.pem
+*.key
 # réglages de l'appli Claude propres à cet ordinateur
 .claude/
 *.log

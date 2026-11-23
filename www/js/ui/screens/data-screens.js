@@ -365,7 +365,7 @@ export function createReconcileScreen(app) {
     const more = record.gap > 0;
     const choice = await chooseDialog({
       title: `Écart de ${formatAmount(Math.abs(record.gap))}`,
-      message: `Au ${formatDate(record.date)}, la banque affiche ${formatAmount(record.realBalance)} et l'appli ${formatAmount(record.computedBalance)}.\n\n${more ? "La banque a plus que l'appli : un revenu n'a pas été saisi, ou une dépense a été saisie en trop." : "La banque a moins que l'appli : une dépense n'a pas été saisie, ou un revenu a été saisi en trop."}`,
+      message: `Au ${formatDate(record.date)}, la banque affiche ${formatAmount(record.realBalance)} et l'appli ${formatAmount(record.computedBalance)}.\n\n${more ? "La banque a plus que l'appli : une entrée n'a pas été saisie, ou une sortie a été saisie en trop." : "La banque a moins que l'appli : une sortie n'a pas été saisie, ou une entrée a été saisie en trop."}`,
       options: [
         { id: 'adjust', label: `Ajuster l'appli (${formatAmount(record.gap, { sign: 'always' })})`, primary: true },
         { id: 'search', label: 'Chercher les opérations non pointées' },

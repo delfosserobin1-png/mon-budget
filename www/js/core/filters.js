@@ -17,8 +17,8 @@ export const PERIODS = Object.freeze([
 ]);
 
 export const TYPES = Object.freeze([
-  { id: 'expense', label: 'Dépenses' },
-  { id: 'income', label: 'Revenus' },
+  { id: 'expense', label: 'Sorties' },
+  { id: 'income', label: 'Entrées' },
   { id: 'transfer', label: "Mouvements d'enveloppes" },
   { id: 'adjustment', label: 'Ajustements' },
 ]);
@@ -159,7 +159,7 @@ export function listTotal(ops, perspective) {
   return sum;
 }
 
-/** Petites étiquettes qui résument le filtre en cours (« Ce mois », « Dépenses », « Courses »…). */
+/** Petites étiquettes qui résument le filtre en cours (« Ce mois », « Sorties », « Courses »…). */
 export function describeFilter(state, filter) {
   const labels = [];
   if (filter.period === 'custom') {

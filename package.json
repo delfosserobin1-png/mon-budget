@@ -1,6 +1,6 @@
 {
   "name": "mon-budget",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "private": true,
   "type": "module",
   "description": "Mon Budget — suivi de comptes personnel par enveloppes, 100 % local",
@@ -13,6 +13,7 @@
     "pwa": "node tools/pwa.mjs",
     "pwa:icones": "node tools/make-pwa-icons.mjs",
     "commentaires": "node tools/commentaires.mjs",
+    "banque": "node tools/banque.mjs",
     "publier": "node tools/publier.mjs",
     "android:preparer": "node tools/android.mjs preparer",
     "apk": "node tools/android.mjs apk"

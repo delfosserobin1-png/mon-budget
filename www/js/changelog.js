@@ -7,6 +7,18 @@
 
 export const CHANGES = [
   {
+    version: '2.3.0',
+    date: '2026-11-24',
+    title: 'Le Bilan, Sortie / Entrée, la banque connectée',
+    items: [
+      "L'onglet Stats devient Bilan : ton compte aujourd'hui et estimé en fin de mois, ce qui demande ton attention (découvert à venir, objectif en retard, sauvegarde…), les 7 prochains jours, puis les graphiques.",
+      'Sortie et Entrée remplacent Dépense et Revenu, partout dans l’appli.',
+      "Sélection multiple : range plusieurs sorties dans une enveloppe d'un coup (suite à ton commentaire n° 4).",
+      'Banque connectée (Plus) : reprends les opérations relevées directement chez ta banque, une fois la connexion installée avec Claude.',
+      "Import d'un relevé : les commerçants courants sont rangés d'office (Carrefour → Courses…) si tu as un tag de ce nom.",
+    ],
+  },
+  {
     version: '2.2.0',
     date: '2026-11-18',
     title: 'Bouton IA et quotas par tag',

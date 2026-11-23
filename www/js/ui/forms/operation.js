@@ -1,4 +1,4 @@
-// Formulaire d'une opération : dépense ou revenu ; mouvement d'enveloppe (alimentation, retrait,
+// Formulaire d'une opération : sortie ou entrée ; mouvement d'enveloppe (alimentation, retrait,
 // déplacement) quand il est ouvert depuis la fiche d'une enveloppe ; ajustement existant.
 // Une seule feuille pour créer et pour modifier. Pendant une création, la saisie est gardée en
 // brouillon à chaque frappe : si on ferme par erreur, on retrouve tout en rouvrant.
@@ -19,6 +19,7 @@ import { impactText, quotaImpact } from '../../core/quotas.js';
 import { formatDate, nowTime } from '../../core/dates.js';
 import { addPhoto, photoThumb } from '../photos.js';
 import { askNewTag } from './tag.js';
+import { confirmTopups as askTopups } from '../topups.js';
 
 const DRAFT_KEY = 'draft:operation';
 
@@ -101,7 +102,7 @@ export function openOperationForm(app, { id = null, preset = null } = {}) {
       f.time = nowTime();
     }
     if (preset) f = { ...f, ...preset, time: preset.time === undefined ? f.time : preset.time };
-    // Le bouton + ne propose plus que Dépense et Revenu : un ancien brouillon de « virement » repart en dépense.
+    // Le bouton + ne propose que Sortie et Entrée : un ancien brouillon de « virement » repart en sortie.
     if (!preset && f.mode === 'transfer') f.mode = 'expense';
   }
   const rule = existing?.recurringId ? app.state.recurring.find((r) => r.id === existing.recurringId) : null;
@@ -222,8 +223,8 @@ export function openOperationForm(app, { id = null, preset = null } = {}) {
         label: 'Type',
         value: f.mode,
         options: [
-          { value: 'expense', label: 'Dépense' },
-          { value: 'income', label: 'Revenu' },
+          { value: 'expense', label: 'Sortie' },
+          { value: 'income', label: 'Entrée' },
         ],
         onChange: (mode) => {
           f.mode = mode;
@@ -298,7 +299,7 @@ export function openOperationForm(app, { id = null, preset = null } = {}) {
     dateHint.hidden = !future;
   }
 
-  // Quotas des tags : on prévient avant d'enregistrer une dépense qui les ferait (presque) atteindre.
+  // Quotas des tags : on prévient avant d'enregistrer une sortie qui les ferait (presque) atteindre.
   let quotaHost = null;
   function updateQuotaHint() {
     if (!quotaHost) return;
@@ -493,8 +494,8 @@ export function openOperationForm(app, { id = null, preset = null } = {}) {
         label: 'Ensuite',
         value: f.thenEnvelopeId,
         name: 'thenEnvelopeId',
-        hint: 'Un revenu arrive toujours sur le compte courant ; tu peux le virer aussitôt vers une enveloppe.',
-        options: [{ value: '', label: 'Laisser sur le compte courant' }, ...envelopeOptions(null, { withBalance: false }).map((o) => ({ value: o.value, label: `Virer vers ${o.label}` }))],
+        hint: 'Une entrée arrive toujours sur le compte courant ; tu peux aussitôt en mettre le montant dans une enveloppe.',
+        options: [{ value: '', label: 'Laisser sur le compte courant' }, ...envelopeOptions(null, { withBalance: false }).map((o) => ({ value: o.value, label: `Alimenter ${o.label}` }))],
         onChange: (value) => {
           f.thenEnvelopeId = value;
           touch();
@@ -679,7 +680,7 @@ export function openOperationForm(app, { id = null, preset = null } = {}) {
           'div.grow',
           existing.auto === 'opening'
             ? "C'est le solde de ton compte au moment où tu as commencé à utiliser l'appli."
-            : "Un ajustement corrige l'écart entre l'appli et la banque, sans correspondre à une vraie dépense.",
+            : "Un ajustement corrige l'écart entre l'appli et la banque, sans correspondre à une vraie sortie ni à une vraie entrée.",
         ),
       ),
     );
@@ -799,15 +800,7 @@ export function openOperationForm(app, { id = null, preset = null } = {}) {
     if (!placed) app.fail(errors[0].message);
   }
 
-  async function confirmTopups(topups) {
-    const lines = topups.map((t) => `« ${accountName(app.state, t.envelopeId)} » : il manque ${formatAmount(t.amount)}`).join('\n');
-    const total = topups.reduce((sum, t) => sum + t.amount, 0);
-    return confirmDialog({
-      title: "L'enveloppe ne contient pas assez",
-      message: `${lines}\n\nUne enveloppe ne peut pas être à découvert. Virer ${formatAmount(total)} du compte courant pour compléter ?`,
-      confirmLabel: 'Virer et enregistrer',
-    });
-  }
+  const confirmTopups = (topups) => askTopups(app, topups);
 
   function finish(label) {
     saved = true;

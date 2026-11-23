@@ -92,8 +92,10 @@ test("premier relevé dans une appli vide : tout est créé, le solde retombe su
   await sheet(page).locator('[data-action="save-line"]').click();
   await noOverlay(page);
   const tagged = wizard(page).locator('.op-row', { has: page.locator('.chip', { hasText: 'Courses' }) });
-  assert.equal(await tagged.count(), 4, 'les 4 passages au même magasin sont rangés pareil');
-  assert.deepEqual([...new Set(await tagged.locator('.title').allInnerTexts())], ['Courses']);
+  const titles = await tagged.locator('.title').allInnerTexts();
+  assert.equal(titles.filter((t) => t === 'Courses').length, 4, 'les 4 passages au même magasin sont rangés et renommés pareil');
+  // et le tag « Courses » existant, le catalogue y range aussi la boulangerie (3 passages), sans la renommer
+  assert.deepEqual(titles.filter((t) => t !== 'Courses').map((t) => t.toLowerCase()), ['boulangerie du parc', 'boulangerie du parc', 'boulangerie du parc']);
 
   // une ligne ignorée puis rétablie
   await wizard(page).locator('.op-row', { hasText: 'Fleuriste Rose' }).click();

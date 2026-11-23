@@ -97,6 +97,7 @@ export function createMoreScreen(app) {
       group(
         'Banque',
         item('bank', 'Importer un relevé', 'PDF, OFX ou CSV : rapproche et complète tes opérations', 'statement'),
+        item('download', 'Banque connectée', app.setting('link:bank', null) ? 'Reprendre les opérations relevées par l’ordinateur' : 'Opérations relevées directement chez ta banque', 'bank'),
         item('checks', 'Rapprochement', lastCheck ? `Dernier constat le ${lastCheck.date.split('-').reverse().join('-')}` : "Comparer le solde de l'appli à celui de la banque", 'reconcile'),
         item('archive', 'Archives', 'Relevés importés, enveloppes clôturées, tickets', 'archives'),
       ),

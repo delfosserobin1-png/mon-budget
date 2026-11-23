@@ -190,7 +190,20 @@ comportement sur ton téléphone reste à constater (`installer-sur-le-telephone
 | Améliorer le rendu visuel | Fait | grand solde, cartes en relief, titres, transitions, poignée des panneaux |
 | Code structuré, tous les tests nécessaires | Fait | 192 tests du moteur, 64 parcours dans un vrai navigateur |
 
+## 17. Demandes de la version 2.3.0
+
+| Demande | État | Remarque |
+| --- | --- | --- |
+| Relève des commentaires 4 fois par jour (demandée en 2.2.0) | À recréer | les tâches s'arrêtaient à leur première commande faute d'autorisation ; supprimées pour être recréées, leur recréation a été refusée par le garde-fou : à toi de décider |
+| Contourner exceptionnellement le garde-fou pour le traitement immédiat | Non | un garde-fou de sécurité ne se contourne pas, même avec ton accord ; d'autres voies sont proposées |
+| Connexion bancaire avec Enable Banking | Fait | construit et testé ; il manque ton compte Enable Banking et ton accord à la SG (`connexion-banque.md`) |
+| Tableau de bord | Fait | onglet « Bilan » |
+| Fonctions de Bankin' : synchronisation, classement automatique, alertes, prévision de fin de mois | Fait en partie | banque connectée (un compte), catalogue des commerçants + règles apprises, alertes dans le Bilan, fin de mois estimée ; notifications sur le téléphone appli fermée : plus tard (il faut un serveur) |
+| Sortie / Entrée plutôt que Dépense / Revenu | Fait | partout |
+| Sélection multiple pour ranger dans une enveloppe (commentaire n° 4) | Fait | |
+| Plusieurs comptes (SG, Bourso…), partage avec ta copine, création de compte, RGPD, CGU, publication officielle | Étudié | `feuille-de-route.md` : étapes, choix à faire |
+
 ## Hors périmètre
 
-Connexion bancaire automatique : écartée au départ ; étudiée en 2.2.0 (`connexion-banque.md`),
-en attente de ta décision.
+Notifications sur le téléphone quand l'appli est fermée, synchronisation entre appareils, partage :
+demandent un serveur (`feuille-de-route.md`).

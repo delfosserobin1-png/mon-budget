@@ -117,7 +117,7 @@ export function createForecastScreen(app) {
           'div.empty',
           h('div.empty-mark', icon('calendar', 'lg')),
           h('h2', 'Rien de prévu'),
-          h('p', "Ajoute une dépense ou un revenu que tu envisages avec le bouton +, ou crée une récurrence (loyer, salaire…) : ses échéances à venir s'afficheront ici."),
+          h('p', "Ajoute une sortie ou une entrée que tu envisages avec le bouton +, ou crée une récurrence (loyer, salaire…) : ses échéances à venir s'afficheront ici."),
         ),
       );
       return;
@@ -208,8 +208,8 @@ export function createForecastScreen(app) {
         { style: { paddingTop: '4px' } },
         h(
           'div.tiles',
-          h('div.tile', h('div.label', 'Revenus réguliers'), h('span.value.num.pos', formatAmount(income)), h('div.delta', 'par mois, en moyenne')),
-          h('div.tile', h('div.label', 'Dépenses régulières'), h('span.value.num', formatAmount(expense)), h('div.delta', 'par mois, en moyenne')),
+          h('div.tile', h('div.label', 'Entrées régulières'), h('span.value.num.pos', formatAmount(income)), h('div.delta', 'par mois, en moyenne')),
+          h('div.tile', h('div.label', 'Sorties régulières'), h('span.value.num', formatAmount(expense)), h('div.delta', 'par mois, en moyenne')),
           saving ? h('div.tile.wide', h('div.label', 'Mis de côté dans les enveloppes'), h('span.value.num', formatAmount(saving)), h('div.delta', 'par mois, en moyenne')) : null,
         ),
       ),

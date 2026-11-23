@@ -50,7 +50,7 @@ test('filtres : type, tag, période ; le compteur et le résumé suivent ; tout 
   const courses = state.tags.find((t) => t.name === 'Courses');
   await page.locator('[data-action="filters"]').click();
   await sheet(page).locator('.pick', { hasText: 'Ce mois' }).click();
-  await sheet(page).locator('.pick', { hasText: 'Dépenses' }).click();
+  await sheet(page).locator('.pick', { hasText: 'Sorties' }).click();
   await sheet(page).locator(`.pick[data-value="${courses.id}"]`).click();
   await sheet(page).locator('[data-action="apply-filters"]').click();
   await noOverlay(page);
@@ -58,7 +58,7 @@ test('filtres : type, tag, période ; le compteur et le résumé suivent ; tout 
   assert.equal(await rows(page).count(), expected.length);
   assert.equal(await page.locator('[data-action="filters"] .badge').innerText(), '3');
   const chips = await page.locator('.filter-line .chip').allInnerTexts();
-  assert.deepEqual(chips.map((c) => c.trim()), ['Ce mois', 'Dépenses', 'Courses']);
+  assert.deepEqual(chips.map((c) => c.trim()), ['Ce mois', 'Sorties', 'Courses']);
   assert.equal(cents((await page.locator('.result-line .amt').innerText()).trim()), expected.reduce((s, o) => s + o.amount, 0));
   await page.locator('[data-action="clear-filters"]').click();
   await page.waitForFunction(() => !document.querySelector('[data-action="filters"] .badge'));
@@ -102,6 +102,48 @@ test('sélection multiple : supprimer plusieurs opérations, annuler, ajouter un
     const op = state.operations.find((o) => o.id === id);
     if (op.kind !== 'transfer') assert.ok(op.tags.includes(tag.id));
   }
+  await done(ctx);
+});
+
+test('sélection multiple : ranger des sorties dans une enveloppe d’un geste (commentaire n° 4), les entrées restent, puis annuler', async () => {
+  const ctx = await openApp({ demo: true });
+  const { page } = ctx;
+  const before = await readState(page);
+  const beforeBalances = await balancesOf(page);
+  // deux petites sorties du compte courant et une entrée, toutes visibles dans la liste
+  const shown = new Set(await rows(page).evaluateAll((els) => els.map((el) => el.dataset.op)));
+  const real = before.operations.filter((o) => shown.has(o.id) && o.kind === 'operation' && !o.simulated && !o.envelopeId);
+  const outs = real.filter((o) => o.amount < 0 && o.amount > -5000).slice(0, 2);
+  const entry = real.find((o) => o.amount > 0);
+  assert.equal(outs.length, 2);
+  assert.ok(entry);
+  // l'enveloppe la mieux garnie : pas de complément à prévoir
+  const target = await page.evaluate(async () => {
+    const { computeBalances } = await import('./js/core/balances.js');
+    const b = computeBalances(window.monBudget.state, { upTo: window.monBudget.today() });
+    return [...b.envelopes.entries()].filter(([id]) => !window.monBudget.state.envelopes.find((e) => e.id === id).closed).sort((x, y) => y[1] - x[1])[0][0];
+  });
+
+  await page.locator('[data-action="select"]').click();
+  for (const o of [...outs, entry]) await page.locator(`[data-screen="operations"] .op-row[data-op="${o.id}"]`).click();
+  assert.match(await page.locator('.select-bar .count').innerText(), /3 sélectionnées/);
+  await page.locator('[data-action="envelope-selection"]').click();
+  assert.match(await page.locator('.dialog').innerText(), /Seules les sorties sont rangées/);
+  await answer(page, target);
+  await noOverlay(page);
+  const state = await readState(page);
+  for (const o of outs) assert.equal(state.operations.find((x) => x.id === o.id).envelopeId, target);
+  assert.equal(state.operations.find((x) => x.id === entry.id).envelopeId, null, 'l’entrée reste sur le compte courant');
+  assert.match(await page.locator('.toast').innerText(), /2 sorties rangées dans « .+ » ; 1 entrée laissée sur le compte courant/);
+  assert.equal(await page.locator('.select-bar').isHidden(), true, 'le mode sélection se referme');
+  const moved = -(outs[0].amount + outs[1].amount);
+  const after = await balancesOf(page);
+  assert.equal(after.available, beforeBalances.available + moved, 'le compte courant récupère ces sorties');
+  assert.equal(after.total, beforeBalances.total, 'le solde total ne bouge pas');
+
+  await page.locator('.undo-pill').click();
+  await page.waitForFunction((id) => !window.monBudget.state.operations.find((o) => o.id === id).envelopeId, outs[0].id);
+  assert.deepEqual(await balancesOf(page), beforeBalances);
   await done(ctx);
 });
 

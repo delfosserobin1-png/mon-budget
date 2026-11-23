@@ -58,7 +58,7 @@ test('lire : les commentaires à traiter, du plus ancien au plus récent, captur
   const result = await tool('lire');
   assert.equal(result.code, 0);
   assert.match(result.out, /^2 commentaires dans moi\/mon-budget-commentaires, dont 2 à traiter\./);
-  assert.ok(result.out.indexOf('n° 1 · Problème · écran Stats · version 2.1.0') < result.out.indexOf('n° 2 · Idée · écran Enveloppes'), 'ordre de traitement');
+  assert.ok(result.out.indexOf('n° 1 · Problème · écran Bilan · version 2.1.0') < result.out.indexOf('n° 2 · Idée · écran Enveloppes'), 'ordre de traitement');
   assert.match(result.out, /Le total du mois est faux\.\nIl manque le loyer\./);
   assert.match(result.out, /\*\*Juste avant\*\*\n\nJ'ai changé de période\./);
   assert.match(result.out, /Captures : commentaires\/n-1\/capture-1\.png/);
@@ -114,7 +114,7 @@ test('répondre, clore, rouvrir : l’appli voit la réponse de Claude, puis « 
   await link.markSeen(id);
   assert.equal(status(id), 'done');
   assert.equal((await tool('lire')).out, `Aucun commentaire à traiter dans ${REPO}.`);
-  assert.match((await tool('lire', '--tous')).out, /n° 1 · Question · écran Stats · version 2\.1\.0 · \d{2}-\d{2}-\d{4} · traité/);
+  assert.match((await tool('lire', '--tous')).out, /n° 1 · Question · écran Bilan · version 2\.1\.0 · \d{2}-\d{2}-\d{4} · traité/);
 
   assert.equal((await tool('rouvrir', '1')).out, 'Commentaire n° 1 remis « à traiter ».');
   await link.sync({ force: true });

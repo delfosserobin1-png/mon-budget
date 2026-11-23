@@ -263,6 +263,16 @@ export function createClaudeLink(store, { fetchImpl = null, api = undefined, onl
     get connected() {
       return !!config();
     },
+    /** Un fichier de la boîte privée (le relevé de la banque déposé par l'ordinateur), en octets. */
+    async download(path) {
+      const cfg = config();
+      if (!cfg) return { ok: false, code: 'not-connected', error: "La connexion à ta boîte privée n'est pas réglée : Plus › Connexion à Claude." };
+      try {
+        return { ok: true, bytes: await clientFor(cfg).downloadFile(path) };
+      } catch (error) {
+        return { ok: false, code: codeOf(error), error: messageOf(error) };
+      }
+    },
     /** Ce qu'on peut afficher de la connexion (jamais le jeton). */
     get info() {
       const cfg = config();

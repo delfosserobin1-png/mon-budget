@@ -200,7 +200,7 @@ test('commentaire envoyé à Claude (petit écran) : capture déposée, réponse
   assert.equal(fake.issues.length, 1);
   const issue = fake.issues[0];
   assert.equal(issue.title, '[Idée] Un total par mois sur une seule ligne.');
-  assert.match(issue.body, /^\*\*Idée\*\* — écran « Stats » — Mon Budget /);
+  assert.match(issue.body, /^\*\*Idée\*\* — écran « Bilan » — Mon Budget /);
   assert.match(issue.body, /Ce serait plus lisible\./);
   const marker = parseMarker(issue.body);
   const report = (await readState(page)).bugReports[0];

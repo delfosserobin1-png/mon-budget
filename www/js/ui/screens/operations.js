@@ -9,7 +9,9 @@ import { openOperationForm } from '../forms/operation.js';
 import { openFilterSheet } from '../forms/filters.js';
 import { computeBalances } from '../../core/balances.js';
 import { emptyFilter, filterOperations, sortNewestFirst, describeFilter, activeCount, isFilterActive, listTotal } from '../../core/filters.js';
-import { planAddTag, planDeleteOperations } from '../../core/operations.js';
+import { planAddTag, planDeleteOperations, planSetEnvelope, topupChangeset } from '../../core/operations.js';
+import { merge } from '../../core/changeset.js';
+import { confirmTopups } from '../topups.js';
 import { formatAmount } from '../../core/money.js';
 
 const PAGE = 150;
@@ -76,6 +78,7 @@ export function createOperationsScreen(app) {
     h('button.icon-btn', { type: 'button', 'aria-label': 'Quitter la sélection', onclick: () => stopSelecting() }, icon('x')),
     selectCount,
     h('button.btn.small.quiet', { type: 'button', dataset: { action: 'select-all' }, onclick: () => toggleAll() }, 'Tout'),
+    h('button.icon-btn', { type: 'button', 'aria-label': 'Ranger la sélection dans une enveloppe', dataset: { action: 'envelope-selection' }, onclick: () => envelopeSelection() }, icon('envelope')),
     h('button.icon-btn', { type: 'button', 'aria-label': 'Ajouter un tag à la sélection', dataset: { action: 'tag-selection' }, onclick: () => tagSelection() }, icon('tag')),
     h('button.icon-btn', { type: 'button', 'aria-label': 'Supprimer la sélection', dataset: { action: 'delete-selection' }, onclick: () => deleteSelection() }, icon('trash')),
   );
@@ -146,6 +149,37 @@ export function createOperationsScreen(app) {
     const plan = planDeleteOperations(app.state, [...selection], { today: app.today() });
     if (await app.run(plan, { label: `${plural(n, 'opération supprimée', 'opérations supprimées')}` })) stopSelecting();
   }
+  // Ranger d'un coup plusieurs sorties dans une enveloppe (suite au commentaire n° 4), ou les en sortir.
+  async function envelopeSelection() {
+    if (!selection.size) return;
+    const open = app.state.envelopes.filter((e) => !e.closed);
+    if (!open.length) {
+      app.notify("Crée d'abord une enveloppe (onglet Enveloppes).");
+      return;
+    }
+    const choice = await chooseDialog({
+      title: `Ranger ${plural(selection.size, 'opération')}`,
+      message: 'Dans quelle enveloppe ? Seules les sorties sont rangées : une entrée reste sur le compte courant.',
+      options: [...open.map((e) => ({ id: e.id, label: e.name })), { id: 'available', label: 'Compte courant (les sortir de leur enveloppe)' }],
+    });
+    if (!choice) return;
+    const plan = planSetEnvelope(app.state, [...selection], choice === 'available' ? null : choice, { today: app.today() });
+    if (!plan.ok) {
+      app.fail(plan.errors[0].message);
+      return;
+    }
+    if (plan.topups.length) {
+      if (!(await confirmTopups(app, plan.topups))) return;
+      merge(plan.cs, topupChangeset(app.state, plan.topups));
+    }
+    const where = choice === 'available' ? 'sur le compte courant' : `dans « ${open.find((e) => e.id === choice).name} »`;
+    const label = `${plural(plan.moved, 'sortie rangée', 'sorties rangées')} ${where}`;
+    if (await app.commit(plan.cs, { label })) {
+      if (plan.skipped) app.notify(`${label} ; ${plural(plan.skipped, 'entrée laissée', 'entrées laissées')} sur le compte courant`);
+      stopSelecting();
+    }
+  }
+
   async function tagSelection() {
     if (!selection.size) return;
     if (!app.state.tags.length) {
@@ -237,7 +271,7 @@ export function createOperationsScreen(app) {
           'div.empty',
           h('div.empty-mark', icon('list', 'lg')),
           h('h2', 'Aucune opération pour l\'instant'),
-          h('p', 'Ajoute ta première dépense ou ton premier revenu avec le bouton +, ou importe un relevé de ta banque.'),
+          h('p', 'Ajoute ta première sortie ou ta première entrée avec le bouton +, ou importe un relevé de ta banque.'),
           h('button.btn', { type: 'button', onclick: () => app.open('statement') }, icon('bank'), 'Importer un relevé'),
         ),
       );

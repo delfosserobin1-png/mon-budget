@@ -181,5 +181,19 @@ export function createGithubClient({ repo, token, fetchImpl = null, api = GITHUB
     async downloadFile(path) {
       return call('GET', `${base}/contents/${encodePath(path)}`, { accept: 'application/vnd.github.raw+json', raw: true });
     },
+
+    /** Dépose un fichier en remplaçant la version précédente s'il y en a une (relevé de la banque). */
+    async putFile(path, bytes, message) {
+      const url = `${base}/contents/${encodePath(path)}`;
+      let sha = null;
+      try {
+        const info = await call('GET', url);
+        sha = info && info.sha ? String(info.sha) : null;
+      } catch (error) {
+        if (!(error instanceof GithubError) || error.code !== 'missing') throw error;
+      }
+      await call('PUT', url, { body: { message, content: toBase64(bytes), ...(sha ? { sha } : {}) } });
+      return { path, replaced: !!sha };
+    },
   };
 }

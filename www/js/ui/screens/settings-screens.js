@@ -56,7 +56,7 @@ export function createTagsScreen(app) {
       );
       return;
     }
-    screen.content.appendChild(h('p.hint', 'Touche un tag pour changer son nom, sa couleur ou son quota (un plafond de dépenses par jour, semaine, mois…).'));
+    screen.content.appendChild(h('p.hint', 'Touche un tag pour changer son nom, sa couleur ou son quota (un plafond de sorties par jour, semaine, mois…).'));
     const menu = h('div.menu');
     const today = app.today();
     for (const tag of tags) {

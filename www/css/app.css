@@ -884,6 +884,23 @@ table.data td.n, table.data th.n { text-align: right; font-variant-numeric: tabu
   .screen:not([hidden]) { animation: none !important; }
 }
 
+/* ---------- 12. Tableau de bord (haut de l'écran Bilan) ---------- */
+.outlook-row { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; }
+.outlook .label { color: var(--ink-2); font-size: 13.5px; }
+.outlook-big { font-family: "Inter Display", "Inter", system-ui, sans-serif; font-weight: 600; font-size: 32px; line-height: 1.1; letter-spacing: -0.02em; margin-top: 2px; }
+.outlook-big .dec { font-size: 0.55em; font-weight: 500; letter-spacing: 0; color: var(--ink-2); margin-left: 1px; }
+.outlook-end { text-align: right; min-width: 0; }
+.outlook-small { font-family: "Inter Display", "Inter", system-ui, sans-serif; font-weight: 600; font-size: 19px; margin-top: 2px; white-space: nowrap; }
+.outlook-big.alert, .outlook-small.alert { color: var(--red); }
+.outlook .hint { margin: 2px 0 0; }
+.outlook > .hint { margin-top: 10px; }
+.dashboard .notice .link-btn { flex: none; align-self: center; }
+.stats-title { padding-top: 14px; }
+
+/* ---------- 13. Banque connectée ---------- */
+.steps-list { margin: 0; padding-left: 20px; color: var(--ink-2); font-size: 14.5px; }
+.steps-list li + li { margin-top: 6px; }
+
 /* « Quoi de neuf » après une mise à jour */
 .whats-new { display: flex; flex-direction: column; gap: 14px; margin-top: 10px; }
 .whats-new h3 { margin: 0; font-size: 15px; font-weight: 600; }

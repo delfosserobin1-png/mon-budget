@@ -167,6 +167,33 @@ Choix faits en ton absence, à valider ou à changer :
   modifiable dans l'appli. Lors d'une relève, Claude ne fait que ce qui est clair et sans risque ; il
   répond par une question pour le reste.
 
+## Version 2.3.0 : Bilan, Sortie / Entrée, banque connectée
+
+- **Le tableau de bord remplace l'onglet Stats** (renommé « Bilan ») plutôt qu'un 6e onglet : cinq
+  onglets tiennent sur un écran de 360 px, et le jour et les statistiques se complètent. Le tableau de
+  bord ne dépend pas de la période choisie plus bas : il parle d'aujourd'hui.
+- **« Fin du mois, estimé »** = compte courant + opérations réelles déjà datées + prévisions
+  **cochées**, comme l'écran Prévisions. Le point bas n'est montré que s'il est plus bas que les deux.
+- **Les alertes** ne répètent pas les quotas (leur carte est juste en dessous). Un objectif
+  d'enveloppe est « en retard » si l'effort du mois (reste ÷ mois restants) n'est pas fait, en
+  comptant les alimentations déjà prévues ; « manqué » si sa date est passée. Un relevé est
+  « ancien » après 40 jours (un par mois, plus une marge).
+- **Sortie / Entrée**, à ta demande, dans toute l'appli. Le verbe « dépenser » reste là où il est le
+  plus naturel (« Là où tu dépenses le plus »).
+- **Ranger plusieurs opérations dans une enveloppe** : seules les sorties bougent (une entrée arrive
+  toujours sur le compte courant) ; le complément éventuel est daté de la plus ancienne sortie rangée,
+  pour que l'enveloppe ne soit jamais à découvert.
+- **Le catalogue des commerçants** ne crée jamais de tag et ne passe jamais avant une règle apprise :
+  il ne sert qu'à un premier rangement, pour un commerçant jamais vu, si tu as le tag du même nom.
+- **Banque connectée : l'ordinateur fait l'intermédiaire.** La clé d'Enable Banking ne peut pas
+  être dans l'appli (le code de l'appli est public) ; l'ordinateur relève, **chiffre** et dépose dans
+  la boîte privée, que l'appli sait déjà lire. Phrase secrète générée par l'ordinateur (environ 99
+  bits), saisie une fois sur le téléphone, jamais exportée. Seules les opérations
+  **comptabilisées** sont reprises ; elles passent par l'**assistant d'import existant** (même
+  rapprochement, mêmes vérifications, pas de doublon entre deux relevés qui se chevauchent).
+- **Un seul compte suivi** pour l'instant (le compte courant) : plusieurs comptes, c'est l'étape 2
+  de `feuille-de-route.md`.
+
 ## Reporté à plus tard
 
 | Sujet | Pourquoi pas maintenant |
@@ -176,8 +203,8 @@ Choix faits en ton absence, à valider ou à changer :
 | Plafonds et alertes par enveloppe ou par tag | simple à ajouter une fois l'usage réel observé |
 | Diagramme de flux (Sankey) | peu lisible sur un écran de téléphone ; à rediscuter |
 | Traitement immédiat des commentaires (Claude lancé automatiquement sur l'ordinateur) | refusé par le garde-fou de sécurité de Claude : à décider par toi |
-| Connexion directe à la banque | options et proposition dans `connexion-banque.md` |
-| Tableau de bord | proposition faite, en attente de ton choix |
+| Connexion directe à la banque | construite et testée (2.3.0) ; attend ton compte Enable Banking (`connexion-banque.md`) |
+| Plusieurs comptes, partage avec une autre personne, ouverture au public | étudiés dans `feuille-de-route.md` |
 | Recevoir un relevé « partagé » depuis une autre appli (menu Partager du téléphone) | possible pour une appli installée ; à faire si l'import par le sélecteur de fichiers te paraît long |
 | Connexion par QR code au lieu de coller le jeton | confort ; à voir après le premier réglage réel |
 | Refonte visuelle d'après tes maquettes | j'attends tes maquettes ; l'habillage actuel est isolé dans `css/app.css` |

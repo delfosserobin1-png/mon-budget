@@ -68,7 +68,8 @@ Choix structurants :
 - **Centimes entiers** partout : `12,30 €` est `1230`. Aucun arrondi flottant possible.
 - **Dates en texte ISO** (`2026-11-15`), calculs en UTC : pas de décalage d'un jour selon l'heure d'été.
 - **Un mouvement d'enveloppe** est une opération `kind: 'transfer'` avec `from` et `to` (`null` =
-  compte courant). Il ne change jamais le solde total. À l'écran il s'appelle Alimentation (depuis
+  compte courant). Il ne change jamais le solde total. (Les opérations classiques s'appellent « Sortie » et
+  « Entrée » à l'écran.) Un mouvement d'enveloppe s'appelle Alimentation (depuis
   le compte courant), Retrait (vers le compte courant) ou Déplacement (d'une enveloppe à l'autre) :
   `moveLabel(from, to)` dans `core/operations.js`. Le mot « virement » est réservé aux vrais
   virements bancaires, qui sont des dépenses ou des revenus.
@@ -194,6 +195,35 @@ anciennes imparfaites n'empêchent pas de travailler.
   `data-capture="skip"` (le calque, l'onglet IA) en sont exclus, et les photos de tickets aussi.
 - L'élément visé voyage dans le marqueur (`target`) et en clair dans le corps (« Élément visé »).
 
+## Le Bilan (tableau de bord)
+
+- `core/dashboard.js` (pur) : `monthOutlook` (compte courant réel aujourd'hui ; fin du mois et point
+  bas par `projectAvailable`), `upcoming` (7 jours : réel déjà daté + prévisions cochées),
+  `lateGoals` (objectifs d'enveloppe en retard ou manqués, alimentations prévues comprises),
+  `dashboardAlerts` (classées : 'bad', 'warn', 'info' ; chacune avec son action). Les informations
+  propres à l'appareil (rappel de sauvegarde, réponses non lues, fin de l'accord bancaire) lui sont
+  passées par `ui/dashboard.js`.
+- `core/categories.js` : catalogue de commerçants courants → nom de tag, utilisé par
+  `proposeForLine` (import) seulement quand aucune règle ni historique ne s'applique.
+
+## Banque connectée
+
+```
+ tools/banque.mjs (PC)                        boîte privée (GitHub)            téléphone
+ Enable Banking : JWT RS256 ─► opérations ─►  banque/releve.json.chiffre  ─►  ui/screens/bank.js
+ toBankLines / pickBalance                    (core/chiffre.js :              déchiffre, puis
+ format « mon-budget-banque » ─► chiffre      AES-GCM + PBKDF2)               assistant d'import
+```
+
+- La clé privée et la phrase secrète restent sur le PC (`mon-budget.banque.json`, ignoré par git) ;
+  la phrase est saisie une fois sur le téléphone (réglage `link:bankPhrase`, jamais exporté).
+- Le relevé « mon-budget-banque » (JSON) est lu par `parseBankJson` (`io/statement/text-formats.js`)
+  comme un OFX : mêmes lignes interprétées (`labels.js`), solde de départ déduit du solde de la
+  banque, empreinte. L'écran d'import le reçoit par `app.open('statement', { incoming })`.
+- Deux relevés qui se chevauchent : les lignes déjà pointées (même montant, même date bancaire, même
+  libellé) sont reconnues « déjà importées ».
+- `io/github.js` : `putFile` remplace un fichier (avec son `sha`), `downloadFile` le relit.
+
 ## Interface
 
 - `ui/dom.js` : `h('div.classe', { attributs }, enfants…)` construit le DOM, texte toujours échappé.
@@ -225,6 +255,10 @@ anciennes imparfaites n'empêchent pas de travailler.
 - **Quotas** : périodes et bornes (semaine à cheval sur deux années, février bissextile, dates
   libres), remboursements, prévisions, avertissement à la saisie, jauges dans Tags et Stats,
   passage par une sauvegarde.
+- **Banque connectée** : un faux Enable Banking (`tests/fake-enablebanking.js`) vérifie le jeton
+  comme le vrai (signature RS256, identifiant, durée) et découpe les opérations en pages ; l'outil
+  du PC est éprouvé de l'installation au dépôt chiffré, et le téléphone reprend le relevé jusqu'à
+  l'import (`tests/e2e/banque-connectee.test.js`).
 - **Dossier du téléphone** : la fenêtre « choisir un dossier » ne se pilote pas ; elle est remplacée
   par un dossier du stockage privé du navigateur, qui s'utilise de la même façon, ce qui permet de
   relire réellement les fichiers écrits.

@@ -1,4 +1,5 @@
-// Écran « Stats » : où part l'argent, comment évoluent les soldes.
+// Écran « Bilan » (onglet « stats ») : le tableau de bord du jour (ui/dashboard.js, quotas), puis
+// les statistiques : où part l'argent, comment évoluent les soldes.
 // Une seule ligne de filtres en haut (période + périmètre) : tous les graphiques en dépendent,
 // pour que les chiffres soient toujours comparables entre eux.
 
@@ -11,6 +12,7 @@ import { emptyFilter } from '../../core/filters.js';
 import { formatAmount } from '../../core/money.js';
 import { addMonths, daysInMonth, endOfMonth, formatDate, makeISO, monthKey, monthName, monthRange, parts, weekday } from '../../core/dates.js';
 import { quotaCard } from '../quotas-ui.js';
+import { dashboard } from '../dashboard.js';
 
 const IMPORTANCE_STYLE = {
   necessite: { color: 'var(--viz-ord-1)', text: 'var(--viz-ord-1-t)' },
@@ -24,11 +26,15 @@ export function createStatsScreen(app) {
   let scope = 'all';
   let heatMonth = null; // "AAAA-MM" affiché dans le calendrier
 
+  // En haut, le tableau de bord (aujourd'hui, quel que soit le choix de période) ; en dessous, les
+  // statistiques de la période choisie.
+  const dashboardHost = h('div.pad.stack', { style: { paddingBottom: '6px' } });
+  const statsTitle = h('h2.section-title.stats-title', 'Statistiques');
   const periodLine = h('div.filter-line', { role: 'group', 'aria-label': 'Période' });
   const scopeHost = h('div', { style: { padding: '0 16px 10px' } });
   const content = h('div.pad.stack', { style: { paddingTop: '4px' } });
-  const scroll = h('main.scroll', periodLine, scopeHost, content, h('div.bottom-space'));
-  const el = h('section.screen', { dataset: { screen: 'stats' } }, h('header.topbar', h('h1', 'Stats')), scroll);
+  const scroll = h('main.scroll', dashboardHost, statsTitle, periodLine, scopeHost, content, h('div.bottom-space'));
+  const el = h('section.screen', { dataset: { screen: 'stats' } }, h('header.topbar', h('h1', 'Bilan')), scroll);
   scroll.addEventListener('scroll', hideChartTooltip, { passive: true });
   let pendingDraws = [];
   window.addEventListener('resize', () => {
@@ -58,6 +64,16 @@ export function createStatsScreen(app) {
     hideChartTooltip();
     pendingDraws = [];
 
+    // --- tableau de bord : aujourd'hui, alertes, à venir, quotas en cours ---
+    clear(dashboardHost);
+    const hasData = state.operations.some((op) => !op.simulated);
+    if (hasData) dashboardHost.appendChild(dashboard(app));
+    // Quotas des tags : toujours la période en cours (indépendamment de la période choisie plus bas).
+    const quotas = quotaCard(app, { onOpen: (status) => openOperations({ period: 'custom', from: status.from, to: status.to < today ? status.to : today, tags: [status.tagId], types: ['expense', 'income'] }) });
+    if (quotas) dashboardHost.appendChild(quotas);
+    dashboardHost.hidden = !dashboardHost.firstChild;
+    statsTitle.hidden = !hasData;
+
     // --- filtres ---
     const presets = stats.periodPresets(today);
     clear(periodLine);
@@ -85,7 +101,7 @@ export function createStatsScreen(app) {
     if (state.envelopes.length) {
       if (scope !== 'all' && scope !== 'available' && !state.envelopes.some((e) => e.id === scope)) scope = 'all';
       const select = selectField({
-        label: 'Dépenses et revenus de',
+        label: 'Entrées et sorties de',
         value: scope,
         name: 'scope',
         options: [{ value: 'all', label: 'Tout (compte courant et enveloppes)' }, { value: 'available', label: 'Compte courant seulement' }, ...state.envelopes.map((e) => ({ value: e.id, label: `Enveloppe « ${e.name} »` }))],
@@ -102,11 +118,6 @@ export function createStatsScreen(app) {
     const custom = { period: 'custom', from: range.from, to: range.to < today ? range.to : today, account: scope };
     clear(content);
 
-    // Quotas des tags : toujours la période en cours (indépendamment de la période choisie au-dessus).
-    const quotas = quotaCard(app, { onOpen: (status) => openOperations({ period: 'custom', from: status.from, to: status.to < today ? status.to : today, tags: [status.tagId], types: ['expense', 'income'] }) });
-    if (quotas) content.appendChild(quotas);
-
-    const hasData = state.operations.some((op) => !op.simulated);
     if (!hasData) {
       content.appendChild(
         h('div.empty', h('div.empty-mark', icon('stats', 'lg')), h('h2', 'Pas encore de chiffres'), h('p', 'Les statistiques apparaîtront dès tes premières opérations.')),
@@ -118,20 +129,20 @@ export function createStatsScreen(app) {
     const summary = stats.summarize(state, range);
     const tiles = h('div.tiles');
     tiles.appendChild(
-      h('div.tile', { dataset: { tile: 'expense' } }, h('div.label', 'Dépenses'), h('span.value', displayAmount(summary.expense)), summary.previous ? delta(summary.expense, summary.previous.expense, { upIsGood: false, partial: summary.partial }) : null),
+      h('div.tile', { dataset: { tile: 'expense' } }, h('div.label', 'Sorties'), h('span.value', displayAmount(summary.expense)), summary.previous ? delta(summary.expense, summary.previous.expense, { upIsGood: false, partial: summary.partial }) : null),
     );
     tiles.appendChild(
-      h('div.tile', { dataset: { tile: 'income' } }, h('div.label', 'Revenus'), h('span.value', displayAmount(summary.income)), summary.previous ? delta(summary.income, summary.previous.income, { upIsGood: true, partial: summary.partial }) : null),
+      h('div.tile', { dataset: { tile: 'income' } }, h('div.label', 'Entrées'), h('span.value', displayAmount(summary.income)), summary.previous ? delta(summary.income, summary.previous.income, { upIsGood: true, partial: summary.partial }) : null),
     );
     tiles.appendChild(
       h(
         'div.tile',
         { dataset: { tile: 'net' } },
-        h('div.label', 'Revenus moins dépenses'),
+        h('div.label', 'Entrées moins sorties'),
         h('span', { class: summary.net < 0 ? 'value alert' : summary.net > 0 ? 'value pos' : 'value' }, displayAmount(summary.net, { sign: 'always' })),
       ),
     );
-    tiles.appendChild(h('div.tile', h('div.label', 'Dépense moyenne par jour'), h('span.value', displayAmount(summary.perDay)), h('div.delta', `sur ${plural(summary.days, 'jour')}`)));
+    tiles.appendChild(h('div.tile', h('div.label', 'Sorties par jour, en moyenne'), h('span.value', displayAmount(summary.perDay)), h('div.delta', `sur ${plural(summary.days, 'jour')}`)));
     content.appendChild(tiles);
     if (summary.biggest) {
       content.appendChild(
@@ -139,7 +150,7 @@ export function createStatsScreen(app) {
           'button.menu-item',
           { type: 'button', class: 'card', style: { borderRadius: '14px', border: '1px solid var(--rule)' }, onclick: () => openOperations({ ...custom, query: '', minAmount: -summary.biggest.amount, maxAmount: -summary.biggest.amount, types: ['expense'] }) },
           icon('arrowUp'),
-          h('span.texts', h('b', 'Plus grosse dépense'), h('span', `${summary.biggest.label || summary.biggest.counterparty || 'Sans libellé'}, le ${formatDate(summary.biggest.date)}`)),
+          h('span.texts', h('b', 'Plus grosse sortie'), h('span', `${summary.biggest.label || summary.biggest.counterparty || 'Sans libellé'}, le ${formatDate(summary.biggest.date)}`)),
           h('span.amt', formatAmount(-summary.biggest.amount)),
         ),
       );
@@ -197,8 +208,8 @@ export function createStatsScreen(app) {
       content.appendChild(
         chartCard({
           name: 'tags',
-          title: 'Dépenses par tag',
-          subtitle: 'Une dépense qui porte plusieurs tags est partagée entre eux.',
+          title: 'Sorties par tag',
+          subtitle: 'Une sortie qui porte plusieurs tags est partagée entre eux.',
           body: rankedBars(rows),
         }),
       );
@@ -225,7 +236,7 @@ export function createStatsScreen(app) {
             label: monthName(m.key, { short: true, year: false }),
             title: monthName(m.key),
             values: [m.importance.necessite, m.importance.confort, m.importance.caprice, m.importance.none],
-            action: { label: 'Voir les dépenses du mois', run: () => openOperations({ period: 'custom', from: `${m.key}-01`, to: endOfMonth(`${m.key}-01`), account: scope, types: ['expense'] }) },
+            action: { label: 'Voir les sorties du mois', run: () => openOperations({ period: 'custom', from: `${m.key}-01`, to: endOfMonth(`${m.key}-01`), account: scope, types: ['expense'] }) },
           })),
         });
         body.appendChild(h('div', { style: { marginTop: '14px' } }, stacked.el));
@@ -250,8 +261,8 @@ export function createStatsScreen(app) {
       const columns = columnChart({
         mode: 'grouped',
         series: [
-          { label: 'Revenus', color: 'var(--viz-3)' },
-          { label: 'Dépenses', color: 'var(--viz-1)' },
+          { label: 'Entrées', color: 'var(--viz-3)' },
+          { label: 'Sorties', color: 'var(--viz-1)' },
         ],
         groups: months.map((m) => ({
           label: monthName(m.key, { short: true, year: false }),
@@ -264,10 +275,10 @@ export function createStatsScreen(app) {
       content.appendChild(
         chartCard({
           name: 'months',
-          title: 'Revenus et dépenses, mois par mois',
-          body: h('div', columns.el, legend([{ label: 'Revenus', color: 'var(--viz-3)' }, { label: 'Dépenses', color: 'var(--viz-1)' }])),
+          title: 'Entrées et sorties, mois par mois',
+          body: h('div', columns.el, legend([{ label: 'Entrées', color: 'var(--viz-3)' }, { label: 'Sorties', color: 'var(--viz-1)' }])),
           table: {
-            columns: [{ label: 'Mois' }, { label: 'Revenus', numeric: true }, { label: 'Dépenses', numeric: true }, { label: 'Différence', numeric: true }],
+            columns: [{ label: 'Mois' }, { label: 'Entrées', numeric: true }, { label: 'Sorties', numeric: true }, { label: 'Différence', numeric: true }],
             rows: months.map((m) => [monthName(m.key), formatAmount(m.income), formatAmount(m.expense), formatAmount(m.net, { sign: 'always' })]),
           },
         }),
@@ -282,7 +293,7 @@ export function createStatsScreen(app) {
         content.appendChild(
           chartCard({
             name: 'envelopes',
-            title: "D'où sortent les dépenses",
+            title: "D'où partent les sorties",
             body: rankedBars(byEnvelope.map((e) => ({ label: e.name, value: e.amount, share: e.share, dot: e.id ? e.color : null, action: () => openOperations({ ...custom, account: e.id || 'available', types: ['expense'] }) }))),
           }),
         );
@@ -308,7 +319,7 @@ export function createStatsScreen(app) {
       content.appendChild(
         chartCard({
           name: 'fixed',
-          title: 'Dépenses fixes et variables',
+          title: 'Sorties fixes et variables',
           subtitle: 'Fixes : celles qui viennent de tes récurrences (loyer, abonnements…).',
           body: h(
             'div',
@@ -361,14 +372,14 @@ export function createStatsScreen(app) {
     content.appendChild(
       chartCard({
         name: 'calendar',
-        title: 'Calendrier des dépenses',
+        title: 'Calendrier des sorties',
         body: h(
           'div',
-          h('div.rowline.between', { style: { marginBottom: '6px' } }, nav(-1, 'Mois précédent', 'back'), h('div.center', h('div.strong', monthName(heatMonth)), h('div.hint', `${formatAmount(monthTotal)} dépensés`)), nav(1, 'Mois suivant', 'right')),
+          h('div.rowline.between', { style: { marginBottom: '6px' } }, nav(-1, 'Mois précédent', 'back'), h('div.center', h('div.strong', monthName(heatMonth)), h('div.hint', `${formatAmount(monthTotal)} sortis`)), nav(1, 'Mois suivant', 'right')),
           heatCalendar({ days, offset: (weekday(`${heatMonth}-01`) + 6) % 7 }),
         ),
         table: {
-          columns: [{ label: 'Jour' }, { label: 'Dépensé', numeric: true }],
+          columns: [{ label: 'Jour' }, { label: 'Sorties', numeric: true }],
           rows: days.filter((d) => d.value).map((d) => [d.label, formatAmount(d.value)]),
         },
       }),

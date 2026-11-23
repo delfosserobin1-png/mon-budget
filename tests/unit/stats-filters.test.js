@@ -136,7 +136,7 @@ test('filtres : tri (le plus ancien en bas), totaux, étiquettes', () => {
   assert.equal(listTotal(november, 'vac'), 30000 - 9000);
   assert.equal(listTotal(november, 'total'), -79701);
   const filter = { ...emptyFilter(), period: 'month', types: ['expense'], tags: ['courses'], account: 'vac', importance: ['none'], minAmount: 1000, withPhoto: true };
-  assert.deepEqual(describeFilter(state, filter), ['Ce mois', 'Dépenses', 'Vacances', 'Courses', 'Importance non précisée', 'Au moins 10,00 €', 'Avec photo']);
+  assert.deepEqual(describeFilter(state, filter), ['Ce mois', 'Sorties', 'Vacances', 'Courses', 'Importance non précisée', 'Au moins 10,00 €', 'Avec photo']);
   assert.equal(activeCount(filter), 7);
   assert.equal(isFilterActive(emptyFilter()), false);
   assert.equal(isFilterActive({ ...emptyFilter(), query: ' x ' }), true);

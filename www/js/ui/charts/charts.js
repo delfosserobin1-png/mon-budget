@@ -396,7 +396,7 @@ export function heatCalendar({ days, offset }) {
     if (!value || !max) return 0;
     return Math.min(4, 1 + Math.floor((value / max) * 3.999));
   };
-  const grid = h('div.heat', { role: 'grid', 'aria-label': 'Dépenses par jour' });
+  const grid = h('div.heat', { role: 'grid', 'aria-label': 'Sorties par jour' });
   for (const name of ['L', 'M', 'M', 'J', 'V', 'S', 'D']) grid.appendChild(h('div.hd', { 'aria-hidden': 'true' }, name));
   for (let i = 0; i < offset; i++) grid.appendChild(h('i.pad', { 'aria-hidden': 'true' }));
   for (const day of days) {

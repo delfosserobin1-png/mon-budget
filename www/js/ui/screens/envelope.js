@@ -95,10 +95,10 @@ export function createEnvelopeScreen(app, { id }) {
     if (usage.operations) {
       mode = await chooseDialog({
         title: `Supprimer « ${e.name} » ?`,
-        message: `Elle contient ${plural(usage.operations, 'dépense')}. Ses alimentations et ses retraits disparaissent dans tous les cas.`,
+        message: `Elle contient ${plural(usage.operations, 'sortie')}. Ses alimentations et ses retraits disparaissent dans tous les cas.`,
         options: [
-          { id: 'detach', label: 'Garder ses dépenses (elles passent sur le compte courant)', primary: true },
-          { id: 'purge', label: 'Supprimer aussi ses dépenses', danger: true },
+          { id: 'detach', label: 'Garder ses sorties (elles passent sur le compte courant)', primary: true },
+          { id: 'purge', label: 'Supprimer aussi ses sorties', danger: true },
         ],
       });
       if (!mode) return;
@@ -163,7 +163,7 @@ export function createEnvelopeScreen(app, { id }) {
     if (!e.closed) {
       actions.appendChild(quickAction('arrowDown', 'Alimenter', 'env-fund', () => openOperationForm(app, { preset: { mode: 'transfer', from: '', to: id } })));
       actions.appendChild(quickAction('arrowUp', 'Retirer', 'env-withdraw', () => openOperationForm(app, { preset: { mode: 'transfer', from: id, to: '' } }), spendable <= 0));
-      actions.appendChild(quickAction('minus', 'Dépense', 'env-spend', () => openOperationForm(app, { preset: { mode: 'expense', envelopeId: id } })));
+      actions.appendChild(quickAction('minus', 'Sortie', 'env-spend', () => openOperationForm(app, { preset: { mode: 'expense', envelopeId: id } })));
       actions.appendChild(
         quickAction('transfer', 'Vers une autre', 'env-move', () => openOperationForm(app, { preset: { mode: 'transfer', from: id, to: state.envelopes.find((x) => !x.closed && x.id !== id).id } }), !others || spendable <= 0),
       );
@@ -254,7 +254,7 @@ export function createEnvelopeScreen(app, { id }) {
             ),
           );
         }
-        block.appendChild(h('div.chart-card', { style: { marginTop: '12px' } }, h('div.chart-head', h('h2', 'Dépenses par tag')), bars));
+        block.appendChild(h('div.chart-card', { style: { marginTop: '12px' } }, h('div.chart-head', h('h2', 'Sorties par tag')), bars));
       }
       content.appendChild(block);
     }
